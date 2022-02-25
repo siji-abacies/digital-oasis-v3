@@ -1,8 +1,8 @@
 // ** React Imports
 import { Fragment, useState, forwardRef, useEffect } from 'react'
-import { Globe, Plus, Music } from 'react-feather'
+import { Globe, Plus, Music, Settings } from 'react-feather'
 import AvatarGroup from '@components/avatar-group'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import classnames from 'classnames'
 import UserModule from './UserModule'
 import PresenterModule from './PresenterModule'
@@ -10,6 +10,9 @@ import Room from './Room'
 import Agenda from './Agenda'
 import Avatar from '@components/avatar'
 
+// ** Utils
+import { getToken } from '@utils'
+import axios from 'axios'
 // ** Reactstrap Imports
 import {
   Row,
@@ -36,9 +39,12 @@ import {
   Media
 } from 'reactstrap'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
+import moment from 'moment'
 
 const Projects = () => {
+  const { id } = useParams()
 
+  const [project, setProject] = useState([])
   const [active, setActive] = useState('1')
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
@@ -48,28 +54,37 @@ const Projects = () => {
     setActive(tab)
   }
 
-  const data = [
-    {
-      title: 'Vinnie Mostowy',
-      img: require('@src/assets/images/portrait/small/avatar-s-5.jpg').default
-    },
-    {
-      title: 'Elicia Rieske',
-      img: require('@src/assets/images/portrait/small/avatar-s-7.jpg').default
-    },
-    {
-      title: 'Julee Rossignol',
-      img: require('@src/assets/images/portrait/small/avatar-s-10.jpg').default
-    },
-    {
-      title: 'Darcey Nooner',
-      img: require('@src/assets/images/portrait/small/avatar-s-11.jpg').default
-    },
-    {
-      title: 'Jenny Looper',
-      img: require('@src/assets/images/portrait/small/avatar-s-20.jpg').default
+  const getProject = () => {
+    // console.log("TEST")
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/${id}?time_zone=Asia/Kolkata`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
     }
-  ]
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        
+        setProject(response.data.data)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
+  useEffect(() => {
+    getProject()
+     // dispatch(getUser(parseInt(id)))
+   }, [])
 
   return (
     <Fragment>
@@ -78,16 +93,18 @@ const Projects = () => {
           <Card className='card-browser-states' style={{border: '2px solid Orange'}}>
           <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
             <Media>
-              <Avatar className='mr-1' color={`light-primary`} content={'Project Name'} initials  imgHeight={45} imgWidth={45}/>
+              {/* <Avatar className='mr-1' color={`light-primary`} content={project.name} initials  imgHeight={45} imgWidth={45}/> */}
 
               {/* <Avatar className='mr-1' img='http://localhost:3000/static/media/avatar-s-10.79a4ca26.jpg' imgHeight={40} imgWidth={40} /> */}
-              <CardTitle  className='mb-0' tag='h4' style={{marginTop: '5px'}}><h2 className='project-view-color'>Project Name</h2></CardTitle>
+              <CardTitle  className='mb-0' tag='h4' style={{marginTop: '5px'}}>
+                <h2 className='project-view-color'>{project.name}</h2>
+              </CardTitle>
             </Media>
             <div className='d-flex mt-md-0 mt-1'>
               
               <Button className='ml-2 upload-button' color='primary' >
-                <Music size={15}/>
-                <span className='align-middle ml-50'>Upload Audio</span>
+                <Settings size={15}/>
+                <span className='align-middle ml-50'>Waiting Room</span>
               </Button>
               
             </div>
@@ -98,11 +115,11 @@ const Projects = () => {
                 
                 <Row>
                   <Col md='3'>
-                    <p className='project-view-color'><strong>Created By:</strong> John Doe</p>
-                    <p className='project-view-color'><strong>Job Number:</strong> #123DB</p>
+                    {/* <p className='project-view-color'><strong>Created By: </strong>{project.creator.name}</p> */}
+                    <p className='project-view-color'><strong>Job Number: </strong> #{project.job_number}</p>
                   </Col>
                   <Col md='3'>
-                    <p className='project-view-color'><strong>Date:</strong> 14-02-2022</p>
+                    <p className='project-view-color'><strong>Date: </strong>{ moment(project.build_at).format("D-MMM-yy")}</p>
                   </Col>
                   <Col md='6' style={{textAlign:'right'}}>
                     <p className='project-view-color' style={{lineHeight: '0.5rem'}}><strong>Rooms:</strong> 10</p>

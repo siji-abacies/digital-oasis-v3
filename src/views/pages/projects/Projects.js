@@ -3,9 +3,11 @@ import { Fragment, useState, forwardRef, useEffect } from 'react'
 import { MoreVertical, Plus, Trash, Edit } from 'react-feather'
 import AvatarGroup from '@components/avatar-group'
 import { Link, useHistory } from 'react-router-dom'
-// import ReactColorPicker from '@super-effective/react-color-picker'
 import AddProjectModal from './components/AddProjectModal'
 import EditProjectModal from './components/EditProjectModal'
+
+// ** Utils
+import { getToken, selectThemeColors } from '@utils'
 
 // ** Reactstrap Imports
 import {
@@ -38,7 +40,7 @@ import Select, { components } from 'react-select'
 import Uppy from '@uppy/core'
 import { DragDrop } from '@uppy/react'
 import thumbnailGenerator from '@uppy/thumbnail-generator'
-import { selectThemeColors } from '@utils'
+// import { selectThemeColors } from '@utils'
 
 import 'uppy/dist/uppy.css'
 import '@uppy/status-bar/dist/style.css'
@@ -84,7 +86,7 @@ const Projects = () => {
   const history = useHistory()
   const dispatch = useDispatch()
 
-  const token = localStorage.getItem('token')
+  const token = getToken()
   const [projectList, setProjectList] = useState([])
   const [show, setShow] = useState(false)
   const [editShow, setEditShow] = useState(false)
@@ -178,8 +180,6 @@ const Projects = () => {
     // const encode_img = JSON.stringify(img[0].data)
     // console.log(encode_img)
 
-    // const token = "eyJhbGciOiJIUzUxMiIsImlhdCI6MTY0NDM4MDg0MywiZXhwIjoxNjQ0OTg1NjQzfQ.eyJpZCI6NywidXNlcl9yb2xlIjoxfQ.IyzNMBX9p9vXn5mas5emwjzMgF2i6sVi7R74_A6RSqrSHB38SduYb2ub73zNh8jqTMCjHp-c_kJmm15USqomMA"
-
     const formData = new FormData()
     formData.append('file', img[0].data)
 
@@ -187,36 +187,6 @@ const Projects = () => {
       file: img[0].data
       // file: d
     }
-
-    // console.log(formData)
-    // console.log(body1)
-    // console.log(body1.file)
-    // const config = {
-    //   method: 'put',
-    //   url: `https://w-call-demo02.herokuapp.com/user/edit_user_details/7`,
-    //   headers: { 
-    //     // AccessControlAllowOrigin: '*',
-    //     // ContentType: 'application/json',
-    //     ContentType: 'multipart/form-data',
-    //     Authorization: `Token ${token}`
-    //   }
-    //   // data: body1.file
-    //   // file: body1
-    //   // body1
-      
-    // }
-
-    // axios(config, formData)
-    // .then(function (response) {
-    //   console.log(response)
-    //   // data = response.data
-    //   // setUserData(data)
-    //   // handleModal()
-    // })
-    // .catch(function (error) {
-    //   console.log(error)
-    // })
-
 
     console.log('successful files:', result.successful)
     console.log('failed files:', result.failed)
@@ -432,7 +402,7 @@ const Projects = () => {
                 </div>
               </Col>
             </Row>
-            <Button.Ripple color='primary' block className='mt-1' tag={Link} to='/project-view'>
+            <Button.Ripple color='primary' block className='mt-1' tag={Link} to={`/project-view/${item.id}`}>
               open
             </Button.Ripple>
           

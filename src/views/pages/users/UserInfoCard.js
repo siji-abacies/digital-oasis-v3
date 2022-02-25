@@ -48,42 +48,6 @@ import '@uppy/status-bar/dist/style.css'
 import '@styles/react/libs/file-uploader/file-uploader.scss'
 import { useHistory } from 'react-router-dom'
 
-const roleColors = {
-  editor: 'light-info',
-  admin: 'light-danger',
-  author: 'light-warning',
-  maintainer: 'light-success',
-  subscriber: 'light-primary'
-}
-
-const statusColors = {
-  active: 'light-success',
-  pending: 'light-warning',
-  inactive: 'light-secondary'
-}
-
-const statusOptions = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-  { value: 'suspended', label: 'Suspended' }
-]
-
-const countryOptions = [
-  { value: 'uk', label: 'UK' },
-  { value: 'usa', label: 'USA' },
-  { value: 'france', label: 'France' },
-  { value: 'russia', label: 'Russia' },
-  { value: 'canada', label: 'Canada' }
-]
-
-const languageOptions = [
-  { value: 'english', label: 'English' },
-  { value: 'spanish', label: 'Spanish' },
-  { value: 'french', label: 'French' },
-  { value: 'german', label: 'German' },
-  { value: 'dutch', label: 'Dutch' }
-]
-
 const MySwal = withReactContent(Swal)
 
 const UserInfoCard = ({ selectedUser, getUser }) => {
@@ -111,28 +75,6 @@ const UserInfoCard = ({ selectedUser, getUser }) => {
 
   // ** State
   const [show, setShow] = useState(false)
-
-  // ** Hook
-  // const {
-  //   reset,
-  //   control,
-  //   setError,
-  //   handleSubmit,
-  //   formState: { errors }
-  // } = useForm()
-  // {
-  //   defaultValues: {
-  //     first_name: selectedUser.first_name,
-  //     last_name: selectedUser.last_name
-  //     // username: selectedUser.name,
-  //     // lastName: selectedUser.fullName.split(' ')[1],
-  //     // firstName: selectedUser.fullName.split(' ')[0]
-  //     // username: 'Test',
-  //     // lastName: 'LastName',
-  //     // firstName: 'First name'
-  //   }
-  // })
-
   const [modal, setModal] = useState(null)
   const [visibility, setVisibility] = useState(false)
   // const toggleModal = () => {

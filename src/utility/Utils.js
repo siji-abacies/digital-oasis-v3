@@ -77,3 +77,5 @@ export const selectThemeColors = theme => ({
     neutral30: '#ededed' // for input hover border-color
   }
 })
+
+export const getToken = () => localStorage.getItem('token')

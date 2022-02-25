@@ -70,7 +70,7 @@ const Routes = [
     component: lazy(() => import('../../views/pages/projects/Projects'))
   },
   {
-    path: '/project-view',
+    path: '/project-view/:id',
     component: lazy(() => import('../../views/pages/projects/ProjectView'))
   },
   {

@@ -5,11 +5,8 @@ import { Fragment, useState, forwardRef, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import axios from "axios"
 
-// ** Table Data & Columns
-// import { data, columns } from '../data'
-
-// ** Add New Modal Component
-// import AddNewModal from './AddNewModal'
+// ** Utils
+import { getToken, selectThemeColors } from '@utils'
 
 // ** Third Party Components
 import ReactPaginate from 'react-paginate'
@@ -17,7 +14,6 @@ import DataTable from 'react-data-table-component'
 import { ChevronDown, Share, Printer, FileText, File, Grid, Copy, Plus, MoreVertical, Edit, Archive, Trash, X, User, UserCheck, UserX, Database, Settings } from 'react-feather'
 import { useForm, Controller } from 'react-hook-form'
 import Select, { components } from 'react-select'
-import { selectThemeColors } from '@utils'
 
 import {
   Card,
@@ -33,14 +29,7 @@ import {
   Label,
   Row,
   Col, 
-  Badge,
-  Modal, 
-  ModalBody, 
-  ModalHeader, 
-  ModalFooter,
-  Form, 
-  FormGroup, 
-  CustomInput
+  Badge
 } from 'reactstrap'
 
 import StatsHorizontal from '@components/widgets/stats/StatsHorizontal'
@@ -53,9 +42,8 @@ import Uppy from '@uppy/core'
 import { DragDrop } from '@uppy/react'
 import thumbnailGenerator from '@uppy/thumbnail-generator'
 
-import AddNewModal from './AddNewModal'
-import EditNewModal from './EditNewModal'
-// import EditPresenterModal from './modal/EditPresenterModal'
+import AddUserModal from './components/AddUserModal'
+import EditUserModal from './components/EditUserModal'
 
 import 'uppy/dist/uppy.css'
 import '@uppy/status-bar/dist/style.css'
@@ -87,7 +75,7 @@ const status = {
 const DataTableWithButtons = () => { 
   const history = useHistory()
 
-  const token = localStorage.getItem('token')
+  const token = getToken()
   const [userCountList, setUserCountList] = useState([])
   const [userList, setUserList] = useState([])
   const [userData, setUserData] = useState([])
@@ -112,17 +100,6 @@ const DataTableWithButtons = () => {
 
   const increaseCount = () => {
     setCount(count + 1)
-  }
-
-  const deleteForm = e => {
-    e.preventDefault()
-    const slideDownWrapper = e.target.closest('.react-slidedown'),
-      form = e.target.closest('form')
-    if (slideDownWrapper) {
-      slideDownWrapper.remove()
-    } else {
-      form.remove()
-    }
   }
 
   const getUserCount = () => {
@@ -206,14 +183,7 @@ const DataTableWithButtons = () => {
     handleSubmit,
     formState: { errors }
   } = useForm({
-    // defaultValues: {
-    //   username: selectedUser.name,
-    //   // lastName: selectedUser.fullName.split(' ')[1],
-    //   // firstName: selectedUser.fullName.split(' ')[0]
-    //   // username: 'Test',
-    //   lastName: 'LastName',
-    //   firstName: 'First name'
-    // }
+    
   })
   
   const handleConfirmCancel = (row) => {
@@ -721,12 +691,19 @@ const DataTableWithButtons = () => {
           selectableRowsComponent={BootstrapCheckbox}
         />
       </Card>
-      <AddNewModal show={show} setShow={setShow} userList={getUserList} userCount={getUserCount}></AddNewModal>
-      <EditNewModal show={editShow} setShow={setEditShow} userData={userData} userList={getUserList} userCount={getUserCount}></EditNewModal>
-      {/* <EditPresenterModal show={editShow} setShow={setEditShow}></EditPresenterModal> */}
-      
-     
-      {/* <AddNewModal open={modal} handleModal={handleModal} /> */}
+      <AddUserModal 
+        show={show} 
+        setShow={setShow} 
+        userList={getUserList} 
+        userCount={getUserCount}
+      />
+      <EditUserModal 
+        show={editShow} 
+        setShow={setEditShow} 
+        userData={userData} 
+        userList={getUserList} 
+        userCount={getUserCount}
+      />
     </Fragment>
   )
 }
