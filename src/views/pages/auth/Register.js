@@ -8,6 +8,7 @@ import axios from "axios"
 import { useForm, Controller } from 'react-hook-form'
 import { toast, Slide } from 'react-toastify'
 import classnames from 'classnames'
+// import { validator } from 'validator'
 
 const ToastContent = ({ message = null }) => (
   <>
@@ -49,6 +50,9 @@ const RegisterV1 = () => {
   const [password, setPassword] = useState('')
   const [terms, setTerms] = useState(false)
 
+  const [showMessage, setshowMessage] = useState('hide-message')
+  const [messageContent, setmessageContent] = useState()
+
   // const { first_name } = useParams()
   useEffect(() => {
     const url = window.location.href
@@ -75,6 +79,23 @@ const RegisterV1 = () => {
   }
   const { register, errors, handleSubmit, control } = useForm()
 
+  const validate = (value) => {
+    console.log(value)
+
+    const pass = value
+    const regExp = new RegExp(
+      "^(?=.*\\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$"
+    )
+
+    const test = regExp.test(pass)
+    if (test) {
+      setPassword(value)
+      setshowMessage('hide-message')
+    } else {
+      setmessageContent('Password must be min 8 characters, and have 1 Special Character, 1 Uppercase, 1 Number and 1 Lowercase')
+      setshowMessage('show-message')
+    }
+  }
       
   const onSubmit = data => {
     console.log(data)
@@ -257,15 +278,17 @@ const RegisterV1 = () => {
                   Password
                 </Label>
                 <InputPasswordToggle
-                  value={password}
+                  defaultValue={password}
                   id='register-password'
                   name='register-password'
                   className='input-group-merge'
-                  onChange={e => setPassword(e.target.value)}
+                  // onChange={e => setPassword(e.target.value)}
+                  onInput={(e) => validate(e.target.value)}
                   className={classnames({ 'is-invalid': errors['register-password'] })}
                   innerRef={register({ required: true, validate: value => value !== '' })}
                 />
               </FormGroup>
+              <p className={showMessage} style={{fontSize: '12px'}}>{messageContent}</p>
               <FormGroup>
                 <CustomInput
                   type='checkbox'

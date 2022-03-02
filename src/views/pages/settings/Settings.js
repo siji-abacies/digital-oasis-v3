@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
   Button, 
+  CardBody, 
   UncontrolledDropdown, 
   UncontrolledButtonDropdown,
   DropdownToggle,
@@ -33,20 +34,22 @@ import {
   CustomInput
 } from 'reactstrap'
 
-import '@styles/react/libs/flatpickr/flatpickr.scss'
+// import '@styles/react/libs/flatpickr/flatpickr.scss'
 
-import 'uppy/dist/uppy.css'
-import '@uppy/status-bar/dist/style.css'
+// import 'uppy/dist/uppy.css'
+// import '@uppy/status-bar/dist/style.css'
 
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import '@styles/react/libs/tables/react-dataTable-component.scss'
 
 // ** Styles
-import '@styles/react/apps/app-users.scss'
-import { toast, Slide } from 'react-toastify'
+// import '@styles/react/apps/app-users.scss'
+// import { toast, Slide } from 'react-toastify'
 import { useHistory } from 'react-router-dom'
-import CardBody from 'reactstrap/lib/CardBody'
+import TimezoneSelect from 'react-timezone-select'
+import {getToken} from '@utils'
+import { Slide, toast } from 'react-toastify'
 
 const ToastContent = ({ name = null, message = null }) => (
   <>
@@ -98,8 +101,9 @@ const status = {
 }
 
 const DataTableWithButtons = () => {
+  const [selectedTimezone, setSelectedTimezone] = useState({})
   const history = useHistory()
-  const token = localStorage.getItem('token')
+  const token = getToken()
   const [userCountList, setUserCountList] = useState([])
   const [userList, setUserList] = useState([])
   const [userData, setUserData] = useState([])
@@ -156,10 +160,10 @@ const DataTableWithButtons = () => {
     
   ]
   
-  const getUserList = (page) => {
+  const getTimeZone = () => {
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/permission/group/list_paginated_group?page=${page}&per_page=10`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/settings/time_zone`,
       headers: { 
         Authorization: `Token ${token}`
       }
@@ -169,9 +173,9 @@ const DataTableWithButtons = () => {
     axios(config)
     .then(function (response) {
       console.log(response)
-      if (response.data.message === 'Success') {
-        
-        setUserList(response.data)
+      if (response.data.status === 200) {
+        setSelectedTimezone(response.data.data.zone)
+        // setUserList(response.data)
         // console.log(response.data.data)
         // console.log(userCountList)
       }
@@ -185,7 +189,7 @@ const DataTableWithButtons = () => {
 
   // ** Get data on mount
   useEffect(() => {
-    getUserList(1)
+    getTimeZone()
     // dispatch(
     //   getData({
     //     page: currentPage,
@@ -195,368 +199,92 @@ const DataTableWithButtons = () => {
     // )
   }, [dispatch])
   
-  // ** Function to handle per page
-  const handlePerPage = e => {
-    // dispatch(
-    //   getData({
-    //     page: currentPage,
-    //     perPage: parseInt(e.target.value),
-    //     q: searchValue
-    //   })
-    // )
-    setRowsPerPage(parseInt(e.target.value))
-  }
-
-  const {
-    reset,
-    control,
-    setError,
-    handleSubmit,
-    formState: { errors }
-  } = useForm({
-    // defaultValues: {
-    //   username: selectedUser.name,
-    //   // lastName: selectedUser.fullName.split(' ')[1],
-    //   // firstName: selectedUser.fullName.split(' ')[0]
-    //   // username: 'Test',
-    //   lastName: 'LastName',
-    //   firstName: 'First name'
-    // }
-  })
-  
-  const handleConfirmCancel = (row) => {
-    return MySwal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      customClass: {
-        confirmButton: 'btn btn-primary',
-        cancelButton: 'btn btn-danger ml-1'
-      },
-      buttonsStyling: false
-    }).then(function (result) {
-      if (result.value) {
-  
-        // const token = "eyJhbGciOiJIUzUxMiIsImlhdCI6MTY0NDM4MDg0MywiZXhwIjoxNjQ0OTg1NjQzfQ.eyJpZCI6NywidXNlcl9yb2xlIjoxfQ.IyzNMBX9p9vXn5mas5emwjzMgF2i6sVi7R74_A6RSqrSHB38SduYb2ub73zNh8jqTMCjHp-c_kJmm15USqomMA"
-  
-        axios({ 
-          method: 'delete',
-          url: `https://digital-oasis-dev.herokuapp.com/v3/permission/group/${row.id}`,
-          headers: { 
-                      ContentType : 'application/json', 
-                      Authorization: `Token ${token}` 
-                    }
-          
-        })
-        .then(response => {
-          console.log(response)
-          if (response.data.status === 200) {
-            MySwal.fire({
-              icon: 'success',
-              title: 'Deleted!',
-              text: 'Your file has been deleted.',
-              customClass: {
-                confirmButton: 'btn btn-success'
-              }
-            })
-            getUserList(1)
-            
-          } else if (response.data.status > 200 && response.data.status > 299) {
-            // this.showToast("warning", response.data.message)
-          } else throw response.data
-        })
-        .catch(error => {
-          console.log(error)
-          if (error && error.status === 401) {
-              // this.setState({areaLoading: false})  
-              // this.showToast("error", error.message)
-              // localStorage.removeItem('authProject');
-          }
-          if (error) {
-              // this.setState({areaLoading: false})  
-              // this.showToast("error", error.message)
-          } else {
-              // this.setState({areaLoading: false})  
-              // this.showToast("error", error.message)
-          }
-        })
-  
-        
-      } else if (result.dismiss === MySwal.DismissReason.cancel) {
-        MySwal.fire({
-          title: 'Cancelled',
-          text: 'Group Delete Cancelled',
-          icon: 'error',
-          customClass: {
-            confirmButton: 'btn btn-success'
-          }
-        })
-      }
-    })
-  }
-
-  const role = {
-    1: { title: 'System Admin', color: 'light-success' },
-    2: { title: 'Crew', color: 'light-warning' },
-    3: { title: 'Client', color: 'light-primary' }
-  }
-
-  // ** Renders Role Columns
-  const renderRole = row => {
-    // const roleObj = {
+  const { register, errors, handleSubmit, control } = useForm()
       
-    //   1: {
-    //     title: 'System Admin',
-    //     class: 'text-success',
-    //     icon: Database
-    //   },
-    //   3: {
-    //     title: 'Client',
-    //     class: 'text-primary',
-    //     icon: User
-    //   },
-    //   2: {
-    //     title: 'Crew',
-    //     class: 'text-warning',
-    //     icon: Settings
-    //   }
-    // }
-
-    // const Icon = roleObj[row.user_role] ? roleObj[row.user_role].icon : Edit2
-    const r = row.permissions.map(p => p.name)
-    const reducedArray = row.permissions.reduce((id, gp) => `${id}${gp.name}, `, '')
-    const abc = reducedArray.substring(0, reducedArray.length - 1)
-    console.log(r, reducedArray)
-    console.log(abc)
-    return (
-       
-      <span className='text-truncate text-capitalize align-middle'>
-        {reducedArray.slice(0, -1)}
-     
-      </span>
-    )
-  }
-
-  const getUserData = row => {
-    console.log(row)
-    // console.log()
-    setUserData(row)
-    setEditShow(true)
-    //     setEditShow(true)
-    // console.log("test")
-    // cons/ole.log(row)
-    // const config = {
-    //   method: 'get',
-    //   url: `https://digital-oasis-dev.herokuapp.com/v3/user/get_for_edit/${row.id}`,
-    //   headers: { 
-    //     Authorization: `Token ${token}`
-    //   }
-    //   // data : data
-    // }
+  const onSubmit = data => {
+    // console.log(data)
+    console.log(selectedTimezone)
+    if (selectedTimezone && selectedTimezone.label !== undefined) {
+      console.log(selectedTimezone.label)
+      const label = selectedTimezone.label.split(' ')
+      let val = label[0].slice(1, -1)
+      val = val.replace('GMT', '')
+      // console.log(label, val)
+      const d = {
+        zone: selectedTimezone.value,
+        value: val
+      }
+      // {"zone": "Asia/Kolkata", "value": "+5:30"}
+      console.log(d)
+  
+      const config = {
+        method: 'put',
+        url: 'https://digital-oasis-dev.herokuapp.com/v3/settings/time_zone',
+        headers: { 
+          ContentType: 'application/json',
+          Authorization: `Token ${token}`
+        }, 
+        data : d
+      }
+        
+      axios(config)
+      .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        // getProjectList(1)
+        // setShow(false)
+        toast.success(
+        <ToastContent message='Timezone Successfully Added' />,
+          { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+        )
+        } else if (response.data.status === 409) {
+          toast.success(
+          <ToastContent message={response.data.message} />,
+            { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+          )
+        }
+          // console.log(JSON.stringify(response.data))
+      })
+      .catch(function (error) {
+        console.log(error)
+        // history.push('/login')
+      })
+    }
     
-    // axios(config)
-    // .then(function (response) {
-    //   console.log(response)
-    //   if (response.data.message === 'Success') {
-    //     setUserData(response.data.data)
-    //     setEditShow(true)
-    //     // setUserList(response.data)
-    //     // console.log(response.data.data)
-    //     // console.log(userCountList)
-    //   }
-    //   console.log(JSON.stringify(response.data))
-    // })
-    // .catch(function (error) {
-    //   console.log(error)
-    // })
+
   }
-
-  // ** Table Common Column
-  const columns = [
-  {
-    name: 'Group Name',
-    selector: 'name',
-    sortable: true,
-    minWidth: '250px'
-  },
-  {
-    name: 'Privileges',
-    sortable: true,
-    minWidth: '250px', 
-    selector: 'permissions[0].name',
-    cell: row => renderRole(row)
-  },
-  {
-    name: 'Actions',
-    allowOverflow: true,
-    cell: row => {
-      return (
-        <div className='d-flex'>
-          <UncontrolledDropdown>
-            <DropdownToggle className='pr-1' tag='span'>
-              <MoreVertical size={15} />
-            </DropdownToggle>
-            <DropdownMenu right>
-              <DropdownItem className='w-100' onClick={() => getUserData(row)}>
-                <Edit size={15} />
-                <span className='align-middle ml-50'>Edit</span>
-              </DropdownItem>
-              <DropdownItem className='w-100' onClick={() => handleConfirmCancel(row)}>
-                <Trash size={15} />
-                <span className='align-middle ml-50'>Delete</span>
-              </DropdownItem>
-
-            </DropdownMenu>
-          </UncontrolledDropdown>
-        </div>
-      )
-    }
-  }
-]
-
-  // ** Function to handle filter
-  const handleFilter = e => {
-
-    const value = e.target.value
-    let updatedData = []
-    setSearchValue(value)
-
-    const status = {
-      1: { title: 'Current', color: 'light-primary' },
-      2: { title: 'Professional', color: 'light-success' },
-      3: { title: 'Rejected', color: 'light-danger' },
-      4: { title: 'Resigned', color: 'light-warning' },
-      5: { title: 'Applied', color: 'light-info' }
-    }
-
-    if (value.length) {
-      updatedData = userList.data.filter(item => {
-        const startsWith = 
-          item.name.toLowerCase().startsWith(value)
-          // status[item.status].title.toLowerCase().startsWith(value.toLowerCase())
-
-        const includes =
-          item.name.toLowerCase().includes(value)
-          // PERMISSIONS[item.permissions[0]].label.includes(value)
-          
-
-        if (startsWith) {
-          return startsWith
-        } else if (!startsWith && includes) {
-          return includes
-        } else return null
-      })
-      setFilteredData(updatedData)
-      setSearchValue(value)
-    }
-  }
-
-  // ** Function to handle Pagination
-  const handlePagination = page => {
-    setCurrentPage(page.selected)
-    getUserList(page.selected + 1)
-  }
-
-  // ** Custom Pagination
-  const CustomPagination = () => (
-    <ReactPaginate
-      previousLabel=''
-      nextLabel=''
-      forcePage={currentPage}
-      onPageChange={page => handlePagination(page)}
-      pageCount={searchValue.length ? filteredData.length / 10 : userList.pagination.total / 10 || 1}
-      breakLabel='...'
-      pageRangeDisplayed={2}
-      marginPagesDisplayed={2}
-      activeClassName='active'
-      pageClassName='page-item'
-      breakClassName='page-item'
-      breakLinkClassName='page-link'
-      nextLinkClassName='page-link'
-      nextClassName='page-item next'
-      previousClassName='page-item prev'
-      previousLinkClassName='page-link'
-      pageLinkClassName='page-link'
-      breakClassName='page-item'
-      breakLinkClassName='page-link'
-      containerClassName='pagination react-paginate separated-pagination pagination-sm justify-content-end pr-1 mt-1'
-    />
-  )
-
-  // ** Converts table to CSV
-  function convertArrayOfObjectsToCSV(array) {
-    let result
-
-    const columnDelimiter = ','
-    const lineDelimiter = '\n'
-    const keys = Object.keys(data[0])
-
-    result = ''
-    result += keys.join(columnDelimiter)
-    result += lineDelimiter
-
-    array.forEach(item => {
-      let ctr = 0
-      keys.forEach(key => {
-        if (ctr > 0) result += columnDelimiter
-
-        result += item[key]
-
-        ctr++
-      })
-      result += lineDelimiter
-    })
-
-    return result
-  }
-
-  // ** Downloads CSV
-  function downloadCSV(array) {
-    const link = document.createElement('a')
-    let csv = convertArrayOfObjectsToCSV(array)
-    if (csv === null) return
-
-    const filename = 'export.csv'
-
-    if (!csv.match(/^data:text\/csv/i)) {
-      csv = `data:text/csv;charset=utf-8,${csv}`
-    }
-
-    link.setAttribute('href', encodeURI(csv))
-    link.setAttribute('download', filename)
-    link.click()
-  }
-
-  const userRoles = [
-    { value: '1', label: 'System Admin', color: '#00B8D9', isFixed: true },
-    { value: '2', label: 'Client', color: '#0052CC', isFixed: true },
-    { value: '3', label: 'Crew', color: '#5243AA', isFixed: true }
-  ]
-
-  const users = [
-    { value: '1', label: 'Stella Ganderton', color: '#00B8D9', isFixed: true },
-    { value: '2', label: 'Harmonia Nisius', color: '#0052CC', isFixed: true },
-    { value: '3', label: 'Genevra Honeywood', color: '#5243AA', isFixed: true }
-  ]
 
   return (
     <Fragment>
       <h1 className='mb-1'>Settings</h1>
       <Card>
         <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
-          <CardTitle tag='h4'>Tag Group List</CardTitle>
+          <CardTitle tag='h4'>Timezone Settings</CardTitle>
           <div className='d-flex mt-md-0 mt-1'>
-            
-            <Button className='ml-2' color='primary' onClick={() => setShow(true)}>
-              <Plus size={15} />
-              <span className='align-middle ml-50'>New Group</span>
-            </Button>
-            
           </div>
         </CardHeader>
-        <CardBody></CardBody>
+        <CardBody>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <Row>
+              <Col md={12}>
+                <FormGroup>
+                  <TimezoneSelect
+                    name='timezone'
+                    value={selectedTimezone}
+                    onChange={setSelectedTimezone}
+                    // control={control} 
+                    innerRef={register({ required: false })}
+                    invalid={errors.timezone && true}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Button color='primary' type='submit'>
+                    <span className='align-middle ml-50'>Save</span>
+            </Button>
+          </Form>
+        
+        </CardBody>
        
       </Card>
      

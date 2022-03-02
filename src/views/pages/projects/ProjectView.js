@@ -45,13 +45,39 @@ const Projects = () => {
   const { id } = useParams()
 
   const [project, setProject] = useState([])
+  const [creator, setCreator] = useState([])
+  const [timezone, setTimezone] = useState('')
   const [active, setActive] = useState('1')
   const [dropdownOpen, setDropdownOpen] = useState(false)
-
+  const [allowContent, setAllowContent] = useState(false)
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen)
 
   const toggle = tab => {
     setActive(tab)
+  }
+  const getTimezone = () => {
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/settings/time_zone`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        setTimezone(response.data.data.zone)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
   }
 
   const getProject = () => {
@@ -70,6 +96,8 @@ const Projects = () => {
       if (response.data.status === 200) {
         
         setProject(response.data.data)
+        setCreator(response.data.data.creator)
+        setAllowContent(true)
       } else if (response.data.status === 401) {
         history.push('/login')
       }
@@ -82,18 +110,22 @@ const Projects = () => {
   }
 
   useEffect(() => {
+    getTimezone()
     getProject()
      // dispatch(getUser(parseInt(id)))
    }, [])
 
   return (
+    
     <Fragment>
+       {allowContent && (
+         <>
       <Row>
         <Col md='12'>
           <Card className='card-browser-states' style={{border: '2px solid Orange'}}>
           <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
             <Media>
-              {/* <Avatar className='mr-1' color={`light-primary`} content={project.name} initials  imgHeight={45} imgWidth={45}/> */}
+              <Avatar className='mr-1' color={`light-primary`} content={project ? project.name : 'tests test'} initials  imgHeight={45} imgWidth={45}/>
 
               {/* <Avatar className='mr-1' img='http://localhost:3000/static/media/avatar-s-10.79a4ca26.jpg' imgHeight={40} imgWidth={40} /> */}
               <CardTitle  className='mb-0' tag='h4' style={{marginTop: '5px'}}>
@@ -115,16 +147,16 @@ const Projects = () => {
                 
                 <Row>
                   <Col md='3'>
-                    {/* <p className='project-view-color'><strong>Created By: </strong>{project.creator.name}</p> */}
+                    <p className='project-view-color'><strong>Created By: </strong>{creator.name}</p>
                     <p className='project-view-color'><strong>Job Number: </strong> #{project.job_number}</p>
                   </Col>
                   <Col md='3'>
                     <p className='project-view-color'><strong>Date: </strong>{ moment(project.build_at).format("D-MMM-yy")}</p>
                   </Col>
                   <Col md='6' style={{textAlign:'right'}}>
-                    <p className='project-view-color' style={{lineHeight: '0.5rem'}}><strong>Rooms:</strong> 10</p>
-                    <p className='project-view-color' style={{lineHeight: '0.5rem'}}><strong>Users:</strong> 10</p>
-                    <p className='project-view-color' style={{lineHeight: '0.5rem'}}><strong>Presenters:</strong> 10</p>
+                    <p className='project-view-color' style={{lineHeight: '0.5rem'}}><strong>Rooms:</strong> {project.rooms_count}</p>
+                    <p className='project-view-color' style={{lineHeight: '0.5rem'}}><strong>Users:</strong> {project.members_count}</p>
+                    <p className='project-view-color' style={{lineHeight: '0.5rem'}}><strong>Presenters:</strong> {project.presenters_count}</p>
                   </Col>
                 
                 
@@ -132,7 +164,7 @@ const Projects = () => {
                 <Media>
                   <Globe size={34} className='mr-2' color='#28C76F'/>
                   <Media className='my-auto' body>
-                    <h4 className='mb-0 timezone-color'>Asia/Kolkata</h4>
+                    <h4 className='mb-0 timezone-color'>{timezone}</h4>
                     <CardText className='font-small-3 mb-0 timezone-color'>Friday, February 10, 2022</CardText>
                   </Media>
                 </Media>
@@ -232,8 +264,11 @@ const Projects = () => {
           </Card>
         </Col>
       </Row>
-      
+      </>
+      )
+    }
     </Fragment>
+   
     
   )
 }

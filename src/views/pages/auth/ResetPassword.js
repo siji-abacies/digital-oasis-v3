@@ -21,7 +21,7 @@ const ResetPasswordV1 = () => {
 
   const SignupSchema = yup.object().shape({
     // 'old-password': yup.string().required(),
-    new_password: yup.string().required(),
+    new_password: yup.string().required("Please Enter your password"),
     retype_password: yup
       .string()
       .required()
@@ -31,6 +31,24 @@ const ResetPasswordV1 = () => {
   const { register, errors, handleSubmit, trigger, reset } = useForm({
     resolver: yupResolver(SignupSchema)
   })
+
+  const validate = (value) => {
+    console.log(value)
+
+    const pass = value
+    const regExp = new RegExp(
+      "^(?=.*\\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$"
+    )
+
+    const test = regExp.test(pass)
+    if (test) {
+      // setPassword(value)
+      setshowMessage('hide-message')
+    } else {
+      setmessageContent('Password must be min 8 characters, and have 1 Special Character, 1 Uppercase, 1 Number and 1 Lowercase')
+      setshowMessage('show-message')
+    }
+  }
 
   const onSubmit = data => {
     trigger()
@@ -86,7 +104,6 @@ const ResetPasswordV1 = () => {
         // reset()
       })
     }
-   
     
   }
 
@@ -150,7 +167,7 @@ const ResetPasswordV1 = () => {
               Reset Password 🔒
             </CardTitle>
             <CardText className='mb-2'>Your new password must be different from previously used passwords</CardText>
-            <p className={showMessage}>{messageContent}</p>
+            <p className={showMessage} style={{fontSize:'12px'}}>{messageContent}</p>
             
             <Form className='auth-reset-password-form mt-2' onSubmit={handleSubmit(onSubmit)}>
               <FormGroup>
@@ -165,7 +182,8 @@ const ResetPasswordV1 = () => {
                   className={classnames('input-group-merge', {
                     'is-invalid': errors['new_password']
                   })} 
-                  autoFocus
+                  onInput={(e) => validate(e.target.value)}
+                  autoFocus 
                 />
                 
               </FormGroup>
@@ -180,7 +198,8 @@ const ResetPasswordV1 = () => {
                   innerRef={register({ required: true })}
                   className={classnames('input-group-merge', {
                     'is-invalid': errors['retype_password']
-                  })}
+                  })} 
+                  onInput={(e) => validate(e.target.value)}
                 />
               </FormGroup>
               <Button.Ripple type='submit' color='primary' block>
