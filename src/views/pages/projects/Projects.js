@@ -3,8 +3,8 @@ import { Fragment, useState, forwardRef, useEffect } from 'react'
 import { MoreVertical, Plus, Trash, Edit } from 'react-feather'
 import AvatarGroup from '@components/avatar-group'
 import { Link, useHistory } from 'react-router-dom'
-import AddProjectModal from './components/AddProjectModal'
-import EditProjectModal from './components/EditProjectModal'
+import AddProject from './components/AddProject'
+import EditProject from './components/EditProject'
 
 // ** Utils
 import { getToken, selectThemeColors } from '@utils'
@@ -14,7 +14,6 @@ import {
   Row,
   Col,
   Card,
-  Input,
   Label,
   Button,
   CardTitle,
@@ -22,25 +21,18 @@ import {
   DropdownMenu,
   DropdownItem,
   DropdownToggle,
-  UncontrolledButtonDropdown,
   Badge,
   UncontrolledDropdown, 
   CardText, 
   CardBody, 
-  Modal, 
-  ModalBody, 
-  ModalHeader, 
-  ModalFooter,
-  Form, 
-  FormGroup, Pagination, PaginationItem, PaginationLink
+  Pagination, PaginationItem, PaginationLink
 } from 'reactstrap'
 
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import Select, { components } from 'react-select'
 import Uppy from '@uppy/core'
 import { DragDrop } from '@uppy/react'
 import thumbnailGenerator from '@uppy/thumbnail-generator'
-// import { selectThemeColors } from '@utils'
 
 import 'uppy/dist/uppy.css'
 import '@uppy/status-bar/dist/style.css'
@@ -124,7 +116,6 @@ const Projects = () => {
   })
 
   const getProjectList = (page) => {
-    // console.log("TEST")
     const config = {
       method: 'get',
       url: `https://digital-oasis-dev.herokuapp.com/v3/project/dashboard?page=1&per_page=6`,
@@ -138,11 +129,10 @@ const Projects = () => {
       console.log(response)
       if (response.data.status === 200) {
         
-        setProjectList(response.data.data)
+        setProjectList(response.data)
       } else if (response.data.status === 401) {
         history.push('/login')
       }
-      // console.log(JSON.stringify(response.data))
     })
     .catch(function (error) {
       console.log(error)
@@ -154,43 +144,6 @@ const Projects = () => {
     getProjectList(1)
     
   }, [dispatch])
-
-  const uppy = new Uppy({
-    meta: { type: 'avatar' },
-    autoProceed: true,
-    restrictions: { maxNumberOfFiles: 1 }
-    // restrictions: { maxNumberOfFiles: 1, allowedFileTypes: ['image/*'] }
-  })
-
-  // uppy.use(Uppy.Tus, { endpoint: 'https://tusd.tusdemo.net/files/' })
-  // /user/edit_user_details/<user_id>
-  uppy.use(thumbnailGenerator)
-
-  uppy.on('thumbnail:generated', (file, preview) => {
-    const arr = previewArr
-    arr.push(preview)
-    setPreviewArr([...arr])
-  })
-
-  uppy.on('complete', (result) => {
-    console.log(result)
-    const img = result.successful
-    const d = img[0].data
-    console.log(img[0].data)
-    // const encode_img = JSON.stringify(img[0].data)
-    // console.log(encode_img)
-
-    const formData = new FormData()
-    formData.append('file', img[0].data)
-
-    const body1 = {
-      file: img[0].data
-      // file: d
-    }
-
-    console.log('successful files:', result.successful)
-    console.log('failed files:', result.failed)
-  })
 
   const onSubmit = data => {
     if (Object.values(data).every(field => field.length > 0)) {
@@ -278,33 +231,6 @@ const Projects = () => {
     })
   }
 
-  const data = [
-    {
-      title: 'Vinnie Mostowy',
-      img: require('@src/assets/images/portrait/small/avatar-s-5.jpg').default
-    },
-    {
-      title: 'Elicia Rieske',
-      img: require('@src/assets/images/portrait/small/avatar-s-7.jpg').default
-    },
-    {
-      title: 'Julee Rossignol',
-      img: require('@src/assets/images/portrait/small/avatar-s-10.jpg').default
-    },
-    {
-      title: 'Darcey Nooner',
-      img: require('@src/assets/images/portrait/small/avatar-s-11.jpg').default
-    },
-    {
-      title: 'Jenny Looper',
-      img: require('@src/assets/images/portrait/small/avatar-s-20.jpg').default
-    },
-    {
-      content: '10+',
-      color: 'light-primary'
-    }
-  ]
-
   const getDataForEdit = (data) => {
     const config = {
       method: 'get',
@@ -330,6 +256,25 @@ const Projects = () => {
       console.log(error)
       // history.push('/login')
     })
+  }
+
+  const renderPagination = (projectList) => {
+    console.log(projectList)
+    if (projectList.data && projectList.data.length > 0) {
+      const page_count = projectList.pagination.total / 6
+      const p_count = page_count > 1 ? page_count : 1
+      console.log(p_count)
+      console.log(projectList)
+      for (let index = 1; index < p_count + 1; index++) {
+        return (
+      
+          <PaginationItem>
+            <PaginationLink href='#'>{index}</PaginationLink>
+          </PaginationItem>
+        
+        )
+      }
+    }
   }
 
   const renderProjects = (projectList) => {
@@ -431,17 +376,17 @@ const Projects = () => {
         </Row>
       </div>
       <Row>
-        {renderProjects(projectList)}
+        {renderProjects(projectList.data)}
         
       </Row>
-      <AddProjectModal 
+      <AddProject
         show={show} 
         setShow={setShow} 
         type={type} 
         getProjectList={getProjectList} 
         ToastContent={ToastContent}
       />
-      <EditProjectModal 
+      <EditProject
         show={editShow} 
         setShow={setEditShow} 
         projectData={dataforEdit} 
@@ -449,35 +394,19 @@ const Projects = () => {
         ToastContent={ToastContent}
       />
 
-      <Pagination className='d-flex mt-3 justify-content-center'>
-      <PaginationItem className='prev-item'>
-        <PaginationLink href='#'></PaginationLink>
-      </PaginationItem>
-      <PaginationItem>
-        <PaginationLink href='#'>1</PaginationLink>
-      </PaginationItem>
-      <PaginationItem>
-        <PaginationLink href='#'>2</PaginationLink>
-      </PaginationItem>
-      <PaginationItem>
-        <PaginationLink href='#'>3</PaginationLink>
-      </PaginationItem>
-      <PaginationItem active>
-        <PaginationLink href='#'>4</PaginationLink>
-      </PaginationItem>
-      <PaginationItem>
-        <PaginationLink href='#'>5</PaginationLink>
-      </PaginationItem>
-      <PaginationItem>
-        <PaginationLink href='#'>6</PaginationLink>
-      </PaginationItem>
-      <PaginationItem>
-        <PaginationLink href='#'>7</PaginationLink>
-      </PaginationItem>
-      <PaginationItem className='next-item'>
-        <PaginationLink href='#'></PaginationLink>
-      </PaginationItem>
-    </Pagination>
+      {projectList.data !== [] && 
+        <Pagination className='d-flex mt-3 justify-content-center'>
+          <PaginationItem className='prev-item'>
+            <PaginationLink href='#'></PaginationLink>
+          </PaginationItem>
+
+          {renderPagination(projectList)}
+
+          <PaginationItem className='next-item'>
+          <PaginationLink href='#'></PaginationLink>
+        </PaginationItem>
+      </Pagination>
+      }
   
     </Fragment>
   )

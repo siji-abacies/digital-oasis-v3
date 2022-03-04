@@ -61,9 +61,11 @@ const AddNewModal = ({ show, setShow, getProjectMembers, ToastContent }) => {
 
   const getUserFilterByRole = (role) => {
     // /user/filter_by_role?user_role=2
+    console.log(role)
+    const r = role === undefined ?  1 : role
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/user/filter_by_role?user_role=${role}`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/user/filter_by_role?user_role=${r}`,
       headers: { 
         Authorization: `Token ${getToken()}`
       }

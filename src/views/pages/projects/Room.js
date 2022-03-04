@@ -14,7 +14,7 @@ import DataTable from 'react-data-table-component'
 import { ChevronDown, Share, Printer, FileText, File, Grid, Copy, Plus, MoreVertical, Edit, Archive, Trash, Download } from 'react-feather'
 import { useForm, Controller } from 'react-hook-form'
 import Select, { components } from 'react-select'
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, getToken } from '@utils'
 
 import {
   Card,
@@ -42,10 +42,12 @@ import {
 
 import Avatar from '@components/avatar'
 import ReactColorPicker from '@super-effective/react-color-picker'
-import AddNewRoomModal from './modal/AddNewRoomModal'
-import EditRoomModal from './modal/EditRoomModal'
+import AddRoom from './components/AddRoom'
+import EditRoom from './components/EditRoom'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import { useParams } from 'react-router-dom'
+import axios from 'axios'
 
 const MySwal = withReactContent(Swal)
 
@@ -60,86 +62,6 @@ const MySwal = withReactContent(Swal)
 // ** Vars
 const states = ['success', 'danger', 'warning', 'info', 'dark', 'primary', 'secondary']
 
-const data = [
-  {
-    responsive_id: '',
-    id: 1,
-    avatar: '10.jpg',
-    full_name: "Korrie O'Crevy",
-    post: 'Nuclear Power Engineer',
-    email: 'kocrevy0@thetimes.co.uk',
-    city: 'Krasnosilka',
-    start_date: '09/23/2016',
-    salary: '$23896.35',
-    age: '61',
-    experience: '1 Year',
-    status: 2,
-    group:'Group 1',
-    room_name: 'Green Room'
-  },
-  {
-    responsive_id: '',
-    id: 2,
-    avatar: '1.jpg',
-    full_name: 'Bailie Coulman',
-    post: 'VP Quality Control',
-    email: 'bcoulman1@yolasite.com',
-    city: 'Hinigaran',
-    start_date: '05/20/2018',
-    salary: '$13633.69',
-    age: '63',
-    experience: '3 Years',
-    status: 2,
-    group:'Group 1',
-    room_name: 'Red Room'
-  },
-  {
-    responsive_id: '',
-    id: 3,
-    avatar: '9.jpg',
-    full_name: 'Stella Ganderton',
-    post: 'Operator',
-    email: 'sganderton2@tuttocitta.it',
-    city: 'Golcowa',
-    start_date: '03/24/2018',
-    salary: '$13076.28',
-    age: '66',
-    experience: '6 Years',
-    status: 5,
-    room_name: 'Stage'
-  },
-  {
-    responsive_id: '',
-    id: 4,
-    avatar: '10.jpg',
-    full_name: 'Dorolice Crossman',
-    post: 'Cost Accountant',
-    email: 'dcrossman3@google.co.jp',
-    city: 'Paquera',
-    start_date: '12/03/2017',
-    salary: '$12336.17',
-    age: '22',
-    experience: '2 Years',
-    status: 2,
-    room_name: 'Tech'
-  },
-  {
-    responsive_id: '',
-    id: 5,
-    avatar: '',
-    full_name: 'Harmonia Nisius',
-    post: 'Senior Cost Accountant',
-    email: 'hnisius4@gnu.org',
-    city: 'Lucan',
-    start_date: '08/25/2017',
-    salary: '$10909.52',
-    age: '33',
-    experience: '3 Years',
-    status: 2,
-    room_name: 'Test Room'
-  }
-]
-
 const status = {
   1: { title: 'Current', color: 'light-primary' },
   2: { title: 'Professional', color: 'light-success' },
@@ -149,6 +71,8 @@ const status = {
 }
 
 const DataTableWithButtons = () => {
+  const { id } = useParams()
+
   const dispatch = useDispatch()
 
   // ** States
@@ -165,6 +89,8 @@ const DataTableWithButtons = () => {
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
 
   const [rowsPerPage, setRowsPerPage] = useState(7)
+  const [data, setData] = useState([])
+  const [dataforEdit, setDataForEdit] = useState([])
 
   const onColorChange = (updatedColor) => {
     setColor(updatedColor)
@@ -175,8 +101,37 @@ const DataTableWithButtons = () => {
     setColorPkr(picker)
   }
 
+  const getRooms = () => {
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/paginated_list/${id}?page=1&per_page=10`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        
+        setData(response.data.data)
+        // setCreator(response.data.data.creator)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
+
   // ** Get data on mount
   useEffect(() => {
+    getRooms()
     // dispatch(
     //   getData({
     //     page: currentPage,
@@ -198,7 +153,7 @@ const DataTableWithButtons = () => {
     setRowsPerPage(parseInt(e.target.value))
   }
 
-  const handleConfirmCancel = () => {
+  const handleConfirmCancel = (row) => {
     return MySwal.fire({
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
@@ -213,20 +168,18 @@ const DataTableWithButtons = () => {
     }).then(function (result) {
       if (result.value) {
   
-        // const token = "eyJhbGciOiJIUzUxMiIsImlhdCI6MTY0NDM4MDg0MywiZXhwIjoxNjQ0OTg1NjQzfQ.eyJpZCI6NywidXNlcl9yb2xlIjoxfQ.IyzNMBX9p9vXn5mas5emwjzMgF2i6sVi7R74_A6RSqrSHB38SduYb2ub73zNh8jqTMCjHp-c_kJmm15USqomMA"
-  
-        // axios({ 
-        //   method: 'delete',
-        //   url: `https://w-call-demo02.herokuapp.com/admin/delete_user/${row.id}`,
-        //   headers: { 
-        //               ContentType : 'application/json', 
-        //               Authorization: `Token ${token}` 
-        //             }
+        axios({ 
+          method: 'delete',
+          url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/${id}?rooms=${row.id}`,
+          headers: { 
+                      ContentType : 'application/json', 
+                      Authorization: `Token ${getToken()}` 
+                    }
           
-        // })
-        // .then(response => {
-        //   console.log(response)
-        //   if (response.data.status === 200) {
+        })
+        .then(response => {
+          console.log(response)
+          if (response.data.status === 200) {
             MySwal.fire({
               icon: 'success',
               title: 'Deleted!',
@@ -235,26 +188,26 @@ const DataTableWithButtons = () => {
                 confirmButton: 'btn btn-success'
               }
             })
-            
-        //   } else if (response.data.status > 200 && response.data.status > 299) {
-        //     // this.showToast("warning", response.data.message)
-        //   } else throw response.data
-        // })
-        // .catch(error => {
-        //   console.log(error)
-        //   if (error && error.status === 401) {
-        //       // this.setState({areaLoading: false})  
-        //       // this.showToast("error", error.message)
-        //       // localStorage.removeItem('authProject');
-        //   }
-        //   if (error) {
-        //       // this.setState({areaLoading: false})  
-        //       // this.showToast("error", error.message)
-        //   } else {
-        //       // this.setState({areaLoading: false})  
-        //       // this.showToast("error", error.message)
-        //   }
-        // })
+            getRooms()
+          } else if (response.data.status > 200 && response.data.status > 299) {
+            // this.showToast("warning", response.data.message)
+          } else throw response.data
+        })
+        .catch(error => {
+          console.log(error)
+          if (error && error.status === 401) {
+              // this.setState({areaLoading: false})  
+              // this.showToast("error", error.message)
+              // localStorage.removeItem('authProject');
+          }
+          if (error) {
+              // this.setState({areaLoading: false})  
+              // this.showToast("error", error.message)
+          } else {
+              // this.setState({areaLoading: false})  
+              // this.showToast("error", error.message)
+          }
+        })
   
         
       } else if (result.dismiss === MySwal.DismissReason.cancel) {
@@ -270,6 +223,37 @@ const DataTableWithButtons = () => {
     })
   }
 
+  const getDataForEdit = (data) => {
+    console.log(data)
+    // setDataForEdit(data)
+    // setEditShow(true)
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/get_single_for_edit/${id}/${data.id}`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        
+        setDataForEdit(response.data.data)
+        setEditShow(true)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
+
   // ** Table Common Column
   const columns = [
   {
@@ -279,13 +263,13 @@ const DataTableWithButtons = () => {
     minWidth: '750px',
     cell: row => (
       <div className='d-flex align-items-center'>
-        {row.avatar === '' ? (
-          <Avatar color={`light-${states[row.status]}`} content={row.full_name} initials />
+        {row.logo === null ? (
+          <Avatar color={`light-${states[row.status]}`} content={row.name} initials />
         ) : (
-          <Avatar img={require(`@src/assets/images/portrait/small/avatar-s-${row.avatar}`).default} />
+          <Avatar img={row.logo} />
         )}
         <div className='user-info text-truncate ml-1'>
-          <span className='d-block font-weight-bold text-truncate'>{row.full_name}</span>
+          <span className='d-block font-weight-bold text-truncate'>{row.name}</span>
           {/* <small>{row.post}</small> */}
         </div>
       </div>
@@ -302,11 +286,11 @@ const DataTableWithButtons = () => {
               <MoreVertical size={15} />
             </DropdownToggle>
             <DropdownMenu right>
-              <DropdownItem className='w-100' onClick={() => setEditShow(true)}>
+              <DropdownItem className='w-100' onClick={() => getDataForEdit(row)}>
                 <Edit size={15} />
                 <span className='align-middle ml-50'>Edit</span>
               </DropdownItem>
-              <DropdownItem className='w-100' onClick={() => handleConfirmCancel()}>
+              <DropdownItem className='w-100' onClick={() => handleConfirmCancel(row)}>
                 <Trash size={15} />
                 <span className='align-middle ml-50'>Delete</span>
               </DropdownItem>
@@ -544,8 +528,8 @@ const DataTableWithButtons = () => {
         />
       </Card>
       
-      <AddNewRoomModal show={show} setShow={setShow} />
-      <EditRoomModal show={editShow} setShow={setEditShow} />
+      <AddRoom show={show} setShow={setShow} roomList={getRooms} />
+      <EditRoom show={editShow} setShow={setEditShow} roomData={dataforEdit} roomList={getRooms}/>
     </Fragment>
   )
 }

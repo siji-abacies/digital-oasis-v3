@@ -122,10 +122,10 @@ const Projects = () => {
          <>
       <Row>
         <Col md='12'>
-          <Card className='card-browser-states' style={{border: '2px solid Orange'}}>
+          <Card className='card-browser-states' style={{border: `2px solid ${project ? project.color : 'light-primary'}`}}>
           <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
             <Media>
-              <Avatar className='mr-1' color={`light-primary`} content={project ? project.name : 'tests test'} initials  imgHeight={45} imgWidth={45}/>
+              <Avatar className='mr-1' color={'light-primary'} content={project ? project.name : 'tests test'} initials  imgHeight={45} imgWidth={45}/>
 
               {/* <Avatar className='mr-1' img='http://localhost:3000/static/media/avatar-s-10.79a4ca26.jpg' imgHeight={40} imgWidth={40} /> */}
               <CardTitle  className='mb-0' tag='h4' style={{marginTop: '5px'}}>
@@ -179,8 +179,7 @@ const Projects = () => {
             </CardBody>
           </Card>
         </Col>
-      </Row>
-      <Row>
+      
         <Col md='12'>
           <Card className='card-browser-states'>
             

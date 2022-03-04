@@ -80,7 +80,7 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
 
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
-
+  const [inputData, setInputData] = useState([])
   const showColorPicker = () => {
     const picker1 = colorPkr === 'colorPkrClose' ? 'colorPkrShow' : 'colorPkrClose'
     setColorPkr(picker1)
@@ -130,34 +130,51 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
     
   }, [dispatch])
 
-  // const { register, errors, handleSubmit, control } = useForm()
+  const { register, errors, handleSubmit, control } = useForm()
       
-  const onChangePrivilege = e => {
-    console.log(e)
+  const onChangePrivilege = (index, e) => {
+    console.log(index, e)
+    // const values = [...inputFields]
+    // values.push({ key: '', value: '' })
+    const permission_values = []
+    e.forEach(element => {
+      permission_values.push(element.value)
+    })
+    // console.log(permission_values)
+    const d = {
+      project_member_id: index, 
+      remove_groups: [], 
+      add_groups: permission_values
+    }
+    console.log(d)
+    inputData.push(d)
+    console.log(inputData)
+    // [ { "project_member_id": id, "remove_groups": [group_id_1, group_id_2], "add_groups": [permission_group_id] } ]
   }
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log(e.target.privileges)
-  }
+  // const handleSubmit = (e) => {
+  //   e.preventDefault()
+  //   console.log(e.target.privileges)
+  // }
 
   const onSubmit = data => {
-    console.log(data)
-    // [ { "project_member_id": id, "remove_groups": [group_id_1, group_id_2], "add_groups": [permission_group_id] } ]
-    if (data.members !== undefined) {
-      let add_member = []
-      const remove_member = []
-      add_member = data.members.map(({value}) => {
-        return value
-      })
-      console.log(add_member)
+    console.log(JSON.stringify(data, null, 4))
+    // console.log(data)
+    // // [ { "project_member_id": id, "remove_groups": [group_id_1, group_id_2], "add_groups": [permission_group_id] } ]
+    // if (data.members !== undefined) {
+    //   let add_member = []
+    //   const remove_member = []
+    //   add_member = data.members.map(({value}) => {
+    //     return value
+    //   })
+    //   console.log(add_member)
 
-      // console.log("teee")
-      // console.log(data.members)
-      // const selectedMembers = data.members
-      // selectedMembers.forEach(element => {
+    //   // console.log("teee")
+    //   // console.log(data.members)
+    //   // const selectedMembers = data.members
+    //   // selectedMembers.forEach(element => {
         
-      // })
-    }
+    //   // })
+    // }
     // console.log(data.build_date, moment(data.build_date[0]).format("Y-MM-D HH:mm:ss"))
     // const d = {
     //   name: data.project_name,
@@ -213,7 +230,7 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
           <h1 className='mb-1'>Privilege Settings</h1>
         </div>
         {/* <Form onSubmit={handleSubmit(onSubmit)}> */}
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit(onSubmit)}>
         {/* <p className='fw-bolder pt-50 mt-2'>12 Members</p> */}
           <ListGroup flush className='mb-2'>
             {memberPrevileges.map((item, index) => {
@@ -227,14 +244,16 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
                       <span>{role[item.user_role].title} </span>
                     </div>
                     <Col md='6'>
-                      <Input
+                      <input hidden value={item.id} name={`project_member_[${item.id}]`} ref={register} type="text" className={`form-control`} />
+                      {/* <input name={`project_member_[${item.id}]`} ref={register} type="text" className={`form-control ${errors.tickets?.[i]?.name ? 'is-invalid' : '' }`} /> */}
+                      {/* <Input
                         id='project_member'
                         name={`project_member_${item.id }`}
                         // innerRef={register(`test.${index}.project_member${item.id }`)}
                         value={item.id} 
                         // control={control} 
                         hidden
-                      />
+                      /> */}
 {/*                       
                       <Controller
                         isClearable 
@@ -251,6 +270,12 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
                         theme={selectThemeColors}
                       /> */}
 
+                    {/* <Controller isClearable 
+                        as={Select} 
+                        isMulti 
+                        control={control} 
+                        options={PERMISSIONS}
+                        name={`privileges[${item.id}]`} ref={register} className={`form-control`} /> */}
                     <Select
                       isClearable={false}
                       theme={selectThemeColors}
@@ -261,9 +286,9 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
                       options={PERMISSIONS}
                       className='react-select mb-1'
                       classNamePrefix='select' 
-                      // onChange={event => {
-                      //   onChangePrivilege(index, event)
-                      // }}
+                      onChange={event => {
+                        onChangePrivilege(item.id, event)
+                      }}
                     />
                     </Col>
                     

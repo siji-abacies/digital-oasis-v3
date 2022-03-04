@@ -14,7 +14,7 @@ import DataTable from 'react-data-table-component'
 import { ChevronDown, Share, Printer, FileText, File, Grid, Copy, Plus, MoreVertical, Send, PlayCircle, Edit, Archive, Trash, XCircle, Folder } from 'react-feather'
 import { useForm, Controller } from 'react-hook-form'
 import Select, { components } from 'react-select'
-import { selectThemeColors } from '@utils'
+import { selectThemeColors, getToken } from '@utils'
 
 import {
   Card,
@@ -45,8 +45,10 @@ import Flatpickr from 'react-flatpickr'
 
 import Repeater from '@components/repeater'
 import { SlideDown } from 'react-slidedown'
-import AddNewAgendaModal from './modal/AddNewAgendaModal'
+import AddAgenda from './components/AddAgenda'
 import EditAgendaModal from './modal/EditAgendaModal'
+import { useParams } from 'react-router-dom'
+import axios from 'axios'
 
 // ** Bootstrap Checkbox Component
 // const BootstrapCheckbox = forwardRef(({ onClick, ...rest }, ref) => (
@@ -152,6 +154,7 @@ const stage = [
 
 const DataTableWithButtons = () => {
   const dispatch = useDispatch()
+  const { id } = useParams()
 
   // ** States
   const [modal, setModal] = useState(false)
@@ -170,89 +173,118 @@ const DataTableWithButtons = () => {
   const [picker, setPicker] = useState(new Date())
   const [basic, setBasic] = useState(new Date())
   const [count, setCount] = useState(1)
+  const [data, setData] = useState([])
+
+  const listAgenda = () => {
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/agenda/paginated_list/${id}?time_zone=Asia/Kolkata&page=1&per_page=10`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        
+        setData(response.data.data)
+        // setCreator(response.data.data.creator)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
 
   // ** Table Common Column
-const columns = [
-  {
-    name: 'Item Name',
-    selector: 'name',
-    sortable: true,
-    width: '150px'
-    // minWidth: '30px'
-  },
-  {
-    name: 'Item Description',
-    selector: 'description',
-    sortable: true,
-    // minWidth: '250px'
-    width: '150px'
-  },
-  {
-    name: 'Start Time',
-    selector: 'start_time',
-    sortable: true,
-    // minWidth: '150px'
-    width: '150px'
-  },
-  {
-    name: 'Length',
-    selector: 'length',
-    sortable: true,
-    // minWidth: '150px'
-    width: '80px'
-  },
-  {
-    name: 'Back Room',
-    selector: 'back_room',
-    sortable: true,
-    // minWidth: '150px'
-    width: '150px'
-  },
-  {
-    name: 'Stage',
-    selector: 'stage',
-    sortable: true,
-    // minWidth: '150px'
-    width: '150px'
-  },
-  {
-    name: 'Actions',
-    width: '150px',
-    allowOverflow: true,
-    cell: row => {
-      return (
-        <div className='d-flex'>
-          <UncontrolledDropdown>
-            <DropdownToggle className='' tag='span'>
-              <MoreVertical size={15} />
-            </DropdownToggle>
-            <DropdownMenu right>
-              <DropdownItem tag='a' href='/' className='w-100' onClick={e => e.preventDefault()}>
-                <Send size={15} />
-                <span className='align-middle ml-50'>Send Mail</span>
-              </DropdownItem>
-              <DropdownItem className='w-100' onClick={() => setEditShow(true)}>
-                <Edit size={15} />
-                <span className='align-middle ml-50'>Edit</span>
-              </DropdownItem>
-              <DropdownItem className='w-100' onClick={() => handleConfirmCancel(row)}>
-                <Trash size={15} />
-                <span className='align-middle ml-50'>Delete</span>
-              </DropdownItem>
-            </DropdownMenu>
-            <PlayCircle size={18} style={{marginRight: '3px'}}/>
-            <XCircle size={18} style={{marginRight: '3px'}}></XCircle>
-            <Folder size={18} />
-          </UncontrolledDropdown>
+  const columns = [
+    {
+      name: 'Item Name',
+      selector: 'name',
+      sortable: true,
+      width: '150px'
+      // minWidth: '30px'
+    },
+    {
+      name: 'Item Description',
+      selector: 'description',
+      sortable: true,
+      // minWidth: '250px'
+      width: '150px'
+    },
+    {
+      name: 'Start Time',
+      selector: 'start_time',
+      sortable: true,
+      // minWidth: '150px'
+      width: '150px'
+    },
+    {
+      name: 'Length',
+      selector: 'length',
+      sortable: true,
+      // minWidth: '150px'
+      width: '80px'
+    },
+    {
+      name: 'Back Room',
+      selector: 'back_room',
+      sortable: true,
+      // minWidth: '150px'
+      width: '150px'
+    },
+    {
+      name: 'Stage',
+      selector: 'stage',
+      sortable: true,
+      // minWidth: '150px'
+      width: '150px'
+    },
+    {
+      name: 'Actions',
+      width: '150px',
+      allowOverflow: true,
+      cell: row => {
+        return (
+          <div className='d-flex'>
+            <UncontrolledDropdown>
+              <DropdownToggle className='' tag='span'>
+                <MoreVertical size={15} />
+              </DropdownToggle>
+              <DropdownMenu right>
+                <DropdownItem tag='a' href='/' className='w-100' onClick={e => e.preventDefault()}>
+                  <Send size={15} />
+                  <span className='align-middle ml-50'>Send Mail</span>
+                </DropdownItem>
+                <DropdownItem className='w-100' onClick={() => setEditShow(true)}>
+                  <Edit size={15} />
+                  <span className='align-middle ml-50'>Edit</span>
+                </DropdownItem>
+                <DropdownItem className='w-100' onClick={() => handleConfirmCancel(row)}>
+                  <Trash size={15} />
+                  <span className='align-middle ml-50'>Delete</span>
+                </DropdownItem>
+              </DropdownMenu>
+              <PlayCircle size={18} style={{marginRight: '3px'}}/>
+              <XCircle size={18} style={{marginRight: '3px'}}></XCircle>
+              <Folder size={18} />
+            </UncontrolledDropdown>
 
-        </div>
-      )
+          </div>
+        )
+      }
     }
-  }
-]
+  ]
 
  // ** Get data on mount
  useEffect(() => {
+   listAgenda()
   // dispatch(
   //   getData({
   //     page: currentPage,
@@ -516,7 +548,7 @@ const handlePerPage = e => {
           // selectableRowsComponent={BootstrapCheckbox}
         />
       </Card>
-      <AddNewAgendaModal show={show} setShow={setShow}></AddNewAgendaModal>
+      <AddAgenda show={show} setShow={setShow}/>
       <EditAgendaModal show={editShow} setShow={setEditShow}></EditAgendaModal>
       
       
