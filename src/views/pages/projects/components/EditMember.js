@@ -63,7 +63,7 @@ const AddNewModal = ({ show, setShow, getProjectMembers, memberData, ToastConten
     setColorPkr(picker1)
   }
 
-  const getUserFilterByRole = () => {
+  const getUserFilterByRole = (user_role) => {
     // /user/filter_by_role?user_role=2
     const r = user_role === undefined ?  1 : user_role
     const config = {
