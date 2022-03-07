@@ -30,6 +30,7 @@ import moment from 'moment'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent }) => {
+  console.log(ToastContent)
   const token = localStorage.getItem('token')
 
   const [picker, setPicker] = useState(new Date())

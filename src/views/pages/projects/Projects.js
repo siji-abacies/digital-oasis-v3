@@ -57,6 +57,8 @@ const type = {
 // ]
 
 const ToastContent = ({ message = null }) => (
+  
+  
   <>
   {message !== null && (
   <Fragment>
@@ -259,13 +261,16 @@ const Projects = () => {
   }
 
   const renderPagination = (projectList) => {
-    console.log(projectList)
+    // console.log(projectList)
     if (projectList.data && projectList.data.length > 0) {
       const page_count = projectList.pagination.total / 6
-      const p_count = page_count > 1 ? page_count : 1
+      const p_count = parseInt(page_count) > 1 ? parseInt(page_count) : 1
       console.log(p_count)
       console.log(projectList)
-      for (let index = 1; index < p_count + 1; index++) {
+      let index
+      
+      for (index = 1; index <= p_count + 1; index++) {
+        console.log(index)
         return (
       
           <PaginationItem>
@@ -274,6 +279,7 @@ const Projects = () => {
         
         )
       }
+      // control.log('index2:'+index)
     }
   }
 
@@ -385,6 +391,7 @@ const Projects = () => {
         type={type} 
         getProjectList={getProjectList} 
         ToastContent={ToastContent}
+        
       />
       <EditProject
         show={editShow} 

@@ -31,6 +31,7 @@ import 'uppy/dist/uppy.css'
 import '@uppy/status-bar/dist/style.css'
 
 const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
+
   const history = useHistory()
   const token = localStorage.getItem('token')
 
