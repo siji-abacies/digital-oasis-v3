@@ -47,6 +47,7 @@ import Repeater from '@components/repeater'
 import { SlideDown } from 'react-slidedown'
 import AddAgenda from './components/AddAgenda'
 import EditAgendaModal from './modal/EditAgendaModal'
+import Teleprompter from './components/Teleprompter'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
 
@@ -164,6 +165,7 @@ const DataTableWithButtons = () => {
 
   const [show, setShow] = useState(false)
   const [editShow, setEditShow] = useState(false)
+  const [teleShow, setTeleShow] = useState(false)
   
   const [setPrevilege, setShowPrevilege] = useState(false)
   const [rowsPerPage, setRowsPerPage] = useState(7)
@@ -174,6 +176,7 @@ const DataTableWithButtons = () => {
   const [basic, setBasic] = useState(new Date())
   const [count, setCount] = useState(1)
   const [data, setData] = useState([])
+  const [presenters, setPresenters] = useState([])
 
   const listAgenda = () => {
     const config = {
@@ -485,6 +488,46 @@ const handlePerPage = e => {
     { value: '3', label: 'Genevra Honeywood', color: '#5243AA', isFixed: true }
   ]
 
+  const getPresenters = () => {
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/presenter/get_all/${id}`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        
+        setPresenters(response.data.data)
+        // setAllowContent(true)
+        // setCreator(response.data.data.creator)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      } else if (response.data.status === 404) {
+        // setAllowContent(true)
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
+  const addItem = () => {
+    getPresenters()
+    setShow(true)
+  }
+
+  const teleprompter = () => {
+    // getTeleprompter()
+    setTeleShow(true)
+  }
+
   return (
     <Fragment>
       <Card>
@@ -492,7 +535,11 @@ const handlePerPage = e => {
           <CardTitle tag='h4'>Schedules</CardTitle>
           <div className='d-flex mt-md-0 mt-1'>
             
-            <Button className='ml-2' color='primary' onClick={() => setShow(true)}>
+            <Button className='ml-2' color='primary' onClick={() => teleprompter()}>
+              <Plus size={15} />
+              <span className='align-middle ml-50'>Add/Edit Teleprompter</span>
+            </Button>
+            <Button className='ml-2' color='primary' onClick={() => addItem()}>
               <Plus size={15} />
               <span className='align-middle ml-50'>Add Item</span>
             </Button>
@@ -550,7 +597,7 @@ const handlePerPage = e => {
       </Card>
       <AddAgenda show={show} setShow={setShow}/>
       <EditAgendaModal show={editShow} setShow={setEditShow}></EditAgendaModal>
-      
+      <Teleprompter show={teleShow} setShow={setTeleShow}/>
       
     </Fragment>
   )

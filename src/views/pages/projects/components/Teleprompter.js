@@ -44,11 +44,16 @@ import {
   import '@uppy/status-bar/dist/style.css'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
+import DataTable from 'react-data-table-component'
+import moment from 'moment'
+
   const AddNewModal = ({ show, setShow }) => {
     const { id } = useParams()
   const [basic, setBasic] = useState(new Date())
-  const [rooms, setRooms] = useState([])
+  const [teleprompterList, setTeleprompter] = useState([])
   const [inputFields, setInputFields] = useState([{ key: '', value: '' }])
+  const [currentPage, setCurrentPage] = useState(0)
+  const [searchValue, setSearchValue] = useState('')
 
   const stage = [
     { value: '1', label: 'Room 1' },
@@ -81,6 +86,8 @@ import axios from 'axios'
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [count, setCount] = useState(1)
+  const [showlist, setShowList] = useState('show-list')
+  const [showitem, setShowItem] = useState('hide-add-item')
 
   const increaseCount = () => {
     setCount(count + 1)
@@ -195,11 +202,67 @@ import axios from 'axios'
         // }
       })
       
-    const listRooms = () => {
+      const addTeleprompter = () => {
+        setShowList('hide-list')
+        setShowItem('show-add-item')
+      }
+
+      const columns = [
+        {
+          name: 'Name',
+          selector: 'name',
+          sortable: true,
+          width: '150px'
+          // minWidth: '30px'
+        },
+        {
+          name: 'Expiry',
+          selector: 'expiry_at',
+          sortable: true,
+          // minWidth: '250px'
+          width: '150px'
+        },
+        {
+          name: 'Allowed Users',
+          selector: 'allowed_users',
+          sortable: true,
+          // minWidth: '150px'
+          width: '150px'
+        }, 
+        {
+          name: 'Actions',
+          width: '150px',
+          allowOverflow: true,
+          cell: row => {
+            return (
+              <div className='d-flex'>
+                <UncontrolledDropdown>
+                  <DropdownToggle className='' tag='span'>
+                    <MoreVertical size={15} />
+                  </DropdownToggle>
+                  <DropdownMenu right>
+                    <DropdownItem className='w-100' onClick={() => editTeleprompter()}>
+                      <Edit size={15} />
+                      <span className='align-middle ml-50'>Edit</span>
+                    </DropdownItem>
+                    <DropdownItem className='w-100' onClick={() => handleConfirmCancel(row)}>
+                      <Trash size={15} />
+                      <span className='align-middle ml-50'>Delete</span>
+                    </DropdownItem>
+                  </DropdownMenu>
+                </UncontrolledDropdown>
+    
+              </div>
+            )
+          }
+        }
+      ]
+
+    const listTeleprompter = () => {
       // /project/room/full_list/<int:project_id>
       const config = {
         method: 'get',
-        url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/full_list/${id}`,
+        url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/list_for_edit/${id}?time_zone=Asia/Kolkata`,
         headers: { 
           Authorization: `Token ${getToken()}`
         }
@@ -209,15 +272,15 @@ import axios from 'axios'
       .then(function (response) {
         console.log(response)
         if (response.data.status === 200) {
-          const data = response.data.data
-          const r = []
-          data.forEach(element => {
-            r.push({
-              value: element.id,
-              label: element.name
-            })
-          })
-          setRooms(r)
+          // const data = response.data.data
+          // const r = []
+          // data.forEach(element => {
+          //   r.push({
+          //     value: element.id,
+          //     label: element.name
+          //   })
+          // })
+          setTeleprompter(response.data.data)
           // setCreator(response.data.data.creator)
         } else if (response.data.status === 401) {
           history.push('/login')
@@ -232,28 +295,58 @@ import axios from 'axios'
 
     useEffect(() => {
       // console.log(memberData.user_role)
-      listRooms()
+      listTeleprompter()
       
     }, [])
 
     const onSubmit = data => {
-      console.log(inputFields)
-
+      // {/* {"expiry_at": "2021-12-30T12:10:20", "name": "Prompter1", "is_open": False, "is_password_protected": False, "allowed_users": 10, "one_time_use": False, "password": "Aewe12"} */}
+      console.log(moment(data.expiry_date).format("Y-MM-D HH:mm:ss"))
       console.log(data)
-      const d = {
+      const d = { 
         name: data.name,
-        start_at: data.start_at,
-        description: data.description, 
-        run_time_expected: data.run_time, 
-        pre_stage_id: data.pre_stage_room.value, 
-        post_stage_id: data.post_stage_room.value, 
-        stage_id: data.stage_room.value,
-        custom_fields: [], 
-        // teleprompter_id: data.password_protected, 
-        add_members: [], 
-        add_presenters: []
+        expiry_at: moment(data.expiry_date).format("Y-MM-D HH:mm:ss"),
+        is_open: data.is_open, 
+        is_password_protected: data.is_password_protected, 
+        allowed_users: data.users, 
+        one_time_use: data.one_time_use, 
+        password: data.password 
       }
       console.log(d)
+
+      const config = {
+        method: 'post',
+        url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/${id}`,
+        headers: { 
+          ContentType: 'application/json',
+          Authorization: `Token ${getToken()}`
+        }, 
+        data : d
+      }
+
+      axios(config)
+      .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        // getProjectMembers()
+        // setShow(false)
+        // toast.success(
+        // <ToastContent message='Project Successfully Added' />,
+        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+        // )
+        } else if (response.data.status === 409) {
+          // toast.success(
+          // <ToastContent message={response.data.message} />,
+          //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+          // )
+        }
+          // console.log(JSON.stringify(response.data))
+      })
+      .catch(function (error) {
+        console.log(error)
+        // history.push('/login')
+      })
+
 
       // /project/agenda/<int:project_id></int:project_id>
       // {"name": "Agendaname", "start_at": "2021-11-01T12:12:12", "description": "Description**", "run_time_expected": 30, "pre_stage_id": 1, "post_stage_id": 2, "stage_id": 5, "custom_fields": [{'key': 'New Title', 'value': 'Val'}], 'teleprompter_id': 1, 'add_members': [{}], 'add_presenters': []}
@@ -287,19 +380,81 @@ import axios from 'axios'
         <ModalHeader className='bg-transparent' toggle={() => setShow(!show)}></ModalHeader>
         <ModalBody className='px-sm-5 pt-50 pb-5'>
           <div className='text-center mb-2'>
-            <h1 className='mb-1'>Add New Agenda Item</h1>
+            <h1 className='mb-1'>Teleprompter</h1>
           </div>
+          <Card className={showlist}>
+            <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
+              <CardTitle tag='h4'>List </CardTitle>
+              <div className='d-flex mt-md-0 mt-1'>
+                
+                <Button className='ml-2' color='primary' onClick={() => addTeleprompter()}>
+                  <Plus size={15} />
+                  <span className='align-middle ml-50'>Add</span>
+                </Button>
+                
+              </div>
+            </CardHeader>
+            <Row className='justify-content-end mx-0'>
+              {/* <Col sm='6'>
+                <div className='d-flex align-items-center mt-1 mb-1'>
+                  <Label for='sort-select'>show</Label>
+                  <Input
+                    className='dataTable-select'
+                    type='select'
+                    id='sort-select'
+                    value={rowsPerPage}
+                    onChange={e => handlePerPage(e)}
+                  >
+                    <option value={7}>7</option>
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={75}>75</option>
+                    <option value={100}>100</option>
+                  </Input>
+                  
+                </div>
+              </Col> */}
+              {/* <Col className='d-flex align-items-center justify-content-end mt-1' md='6' sm='12'>
+                <Label className='mr-1' for='search-input'>
+                  Search
+                </Label>
+                <Input
+                  className='dataTable-filter mb-50'
+                  type='text'
+                  bsSize='sm'
+                  id='search-input'
+                  value={searchValue}
+                  onChange={handleFilter}
+                />
+              </Col> */}
+            </Row>
+            <DataTable
+              noHeader
+              pagination
+              // selectableRows
+              columns={columns}
+              paginationPerPage={7}
+              className='react-dataTable'
+              sortIcon={<ChevronDown size={10} />}
+              paginationDefaultPage={currentPage + 1}
+              // paginationComponent={CustomPagination}
+              data={searchValue.length ? filteredData : teleprompterList}
+              // selectableRowsComponent={BootstrapCheckbox}
+            />
+          </Card> 
           <Form onSubmit={handleSubmit(onSubmit)}>
-            <Row className='gy-1 pt-75'>
+          <Row className={`gy-1 pt-75 ${showitem}`}>
+          {/* {"expiry_at": "2021-12-30T12:10:20", "name": "Prompter1", "is_open": False, "is_password_protected": False, "allowed_users": 10, "one_time_use": False, "password": "Aewe12"} */}
             <Col md={12} xs={12}>
               <FormGroup>
                 <Label className='form-label' for='item_name'>
-                  Item Name
+                  Name
                 </Label>
                 <Input
                   type='text'
-                  id='item_name'
-                  name='item_name'
+                  id='name'
+                  name='name'
                   // defaultValue={selectedUser.email}
                   placeholder='Pre Show 1' 
                   innerRef={register({ required: true })}
@@ -308,201 +463,78 @@ import axios from 'axios'
                 </FormGroup>
             </Col>
             <Col md={12} xs={12}>
-              <FormGroup>
-                <Label className='form-label' for='item_description'>
-                  Item Description
-                </Label>
-                <Input
-                  type='text'
-                  id='item_description'
-                  name='item_description'
-                  innerRef={register({ required: false })}
-                  invalid={errors.item_description && true}
-                  // defaultValue={selectedUser.email}
-                  placeholder='Description'
-                />
-                </FormGroup>
-            </Col>
-            <Col md={6} xs={12}>
-              <FormGroup>
-                <Label for='date-time-picker'>Start Date Time</Label>
+                <FormGroup>
+                  <Label for='date-time-picker'>Expiry Date</Label>
                   <Controller
                     as={Flatpickr}
                     control={control}
-                    defaultValue={picker}
                     id='date-time-picker'
-                    id='date-time-picker'
-                    name='start_at'
-                    innerRef={register({ required: true })}
-                    invalid={errors.start_at && true}
+                    name='expiry_date' 
                     className='form-control' 
+                    defaultValue={new Date()}
+                    innerRef={register({ required: true })}
+                    invalid={errors.expiry_date && true}
                     options={{
                       altFormat: "d/m/Y h:i K",
                       altInput: true
-                    }}
-                    onChange={date => setPicker(date)}
-                   
+                      // dateFormat: "Y-m-d"
+                    }} 
                   />
-                
                 </FormGroup>
             </Col>
-            <Col md={6} xs={12}>
-              <FormGroup>
-                <Label for='date-time-picker'>Run Time</Label>
-                  <Controller
-                    as={Flatpickr}
-                    control={control}
-                    defaultValue={basic}
-                    id='timepicker'
-                    name="run_time"
-                    innerRef={register({ required: true })}
-                    invalid={errors.run_time && true}
-                    className='form-control' 
-                    options={{
-                      enableTime: true,
-                      noCalendar: true,
-                      dateFormat: 'H:i', 
-                      // altFormat: "i",
-                      // altInput: true,
-                      time_24hr: true
-                    }}
-                    onChange={date => setBasic(date)}
-                   
-                  />
-                 
-              </FormGroup>
-            </Col>
-            <Col md={4} xs={12}>
-              <FormGroup>
-                <Label for='date-time-picker'>Pre Stage Room</Label>
-                
-                <Controller
-                  isClearable 
-                  as={Select}
-                  id='react-select'
-                  control={control}
-                  name='pre_stage_room'
-                  options={rooms} 
-                  classNamePrefix='select'  
-                  theme={selectThemeColors} 
-                />
-              </FormGroup>
-            </Col>
-            <Col md={4} xs={12}>
-              <FormGroup>
-                <Label for='date-time-picker'>Stage</Label>
-                <Controller
-                  isClearable 
-                  as={Select}
-                  id='react-select-stage'
-                  control={control}
-                  name='stage_room'
-                  options={rooms} 
-                  classNamePrefix='select'  
-                  theme={selectThemeColors} 
-                />
-              </FormGroup>
-            </Col>
-            <Col md={4} xs={12}>
-              <FormGroup>
-                <Label for='date-time-picker'>Post Stage Room</Label>
-                <Controller
-                  isClearable 
-                  as={Select}
-                  id='react-select-post-stage'
-                  control={control}
-                  name='post_stage_room'
-                  options={rooms} 
-                  classNamePrefix='select'  
-                  theme={selectThemeColors} 
-                />
-              </FormGroup>
-            </Col>
-            <Col className='mb-1' md='12' sm='12'>
-              <Label>Add Users</Label>
-              <Select
-                isClearable={false}
-                theme={selectThemeColors}
-                defaultValue={[users[2], users[3]]}
-                isMulti
-                name='colors'
-                options={users}
-                className='react-select'
-                classNamePrefix='select'
-              />
-            </Col>
-            <Col className='mb-1' md='12' sm='12'>
-              <Label>Add Presenters</Label>
-              <Select
-                isClearable={false}
-                theme={selectThemeColors}
-                defaultValue={[users[2]]}
-                isMulti
-                name='colors'
-                options={users}
-                className='react-select'
-                classNamePrefix='select'
-              />
-            </Col>
-            <Col md={4} xs={12} className='mb-1'>
-                <CustomInput inline type='checkbox' id='exampleCustomCheckbox' label='Add Teleprompter' defaultChecked />
-              </Col>
             <Col md={12} xs={12}>
               <FormGroup>
-                <Label className='form-label' for='teleprompter'>
-                  Select Teleprompter
+                <Label className='form-label' for='item_name'>
+                  Name
                 </Label>
                 <Input
                   type='text'
-                  id='teleprompter'
+                  id='users'
+                  name='users'
                   // defaultValue={selectedUser.email}
-                  placeholder='Lorem Ipsum'
+                  placeholder='10' 
+                  innerRef={register({ required: true })}
+                  invalid={errors.users && true}
                 />
                 </FormGroup>
             </Col>
-
-            <Col md={12} xs={12} style={{marginTop:'15px'}}>
-                <Label>Custom Fields</Label>
-                <Repeater count={count}>
-                  {i => {
-                    const Tag = i === 0 ? 'div' : SlideDown
-                    return (
-                      <Tag key={i}>
-                        <Form>
-                          <Row className='justify-content-between align-items-center'>
-                            <Col md={5}>
-                              <FormGroup>
-                                <Label for={`animation-item-name-${i}`}>Name</Label>
-                                <Input type='text' id={`animation-item-name-${i}`} name='name' placeholder='TNC' value={inputFields.key} onChange={event => handleInputChange(i, event)} />
-                              </FormGroup>
-                            </Col>
-                            <Col md={5}>
-                              <FormGroup>
-                                <Label for={`animation-cost-${i}`}>Value</Label>
-                                <Input type='text' id={`animation-cost-${i}`} placeholder='Manager' value={inputFields.value} onChange={event => handleInputChange(i, event)} />
-                              </FormGroup>
-                            </Col>
-                            
-                            <Col md={2}>
-                              <Button.Ripple color='danger' className='text-nowrap px-1' onClick={deleteForm} outline>
-                                <Trash size={14} className='mr-50' />
-                                <span>Delete</span>
-                              </Button.Ripple>
-                            </Col>
-                            <Col sm={12}>
-                              <hr />
-                            </Col>
-                          </Row>
-                        </Form>
-                      </Tag>
-                    )
-                  }}
-                </Repeater>
+            <Row style={{marginLeft: '0.1em'}}>
+              <Col md={4} xs={12} className='mt-1 mb-1'>
+                <CustomInput inline name='is_open' type='checkbox' id='is_open' label='Is Open'
+                  innerRef={register({ required: false })} 
+                  invalid={errors.is_open && true} 
+                  defaultChecked={false} 
+                />
               </Col>
-              <Button.Ripple className='btn-icon' color='primary' onClick={increaseCount} style={{marginTop:'10px', marginLeft:'15px'}}>
-                <Plus size={14} />
-                <span className='align-middle ml-25'>Add New</span>
-              </Button.Ripple>
+              <Col md={4} xs={12} className='mt-1 mb-1'>
+                <CustomInput inline name='one_time_use' type='checkbox' id='one_time_use' label='One Time Use'
+                  innerRef={register({ required: false })} 
+                  invalid={errors.one_time_use && true} 
+                  defaultChecked={false} 
+                />
+              </Col>
+              <Col md={4} xs={12} className='mt-1 mb-1'>
+                <CustomInput inline name='is_password_protected' type='checkbox' id='is_password_protected' label='Password Protected'
+                  innerRef={register({ required: false })} 
+                  invalid={errors.is_password_protected && true} 
+                  defaultChecked={true} 
+                />
+              </Col>
+              <Col md={12} xs={12}>
+              <Label className='form-label' for='password'>
+                Password
+              </Label>
+              <Input
+                  type='text'
+                  id='password'
+                  name='password'
+                  placeholder='' 
+                  innerRef={register({ required: false })}
+                  invalid={errors.password && true}
+              />
+              
+            </Col>
+            
               
               <Col xs={12} className='text-center mt-2 pt-50'>
                 <Button type='submit' className='me-1' color='primary' style={{marginRight: '20px'}}>
@@ -520,7 +552,9 @@ import axios from 'axios'
                   Cancel
                 </Button>
               </Col>
+
             </Row>
+          </Row>
           </Form>
         </ModalBody>
       </Modal>
