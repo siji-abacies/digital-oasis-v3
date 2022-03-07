@@ -27,7 +27,7 @@ import {
   CustomInput
 
   } from 'reactstrap'
-  import { ChevronDown, Share, Printer, FileText, File, Grid, Copy, Plus, MoreVertical, Edit, Archive, Trash, X } from 'react-feather'
+  import { ChevronDown, Share, Printer, FileText, File, Grid, Copy, Plus, MoreVertical, Edit, Archive, Trash, X, SkipBack, ArrowLeftCircle } from 'react-feather'
 
   import { useForm, Controller } from 'react-hook-form'
   import Select, { components } from 'react-select'
@@ -88,6 +88,7 @@ import moment from 'moment'
   const [count, setCount] = useState(1)
   const [showlist, setShowList] = useState('show-list')
   const [showitem, setShowItem] = useState('hide-add-item')
+  const [singleItem, setSingleItem] = useState([])
 
   const increaseCount = () => {
     setCount(count + 1)
@@ -207,6 +208,52 @@ import moment from 'moment'
         setShowItem('show-add-item')
       }
 
+      const goback = () => {
+        setShowList('show-list')
+        setShowItem('hide-add-item')
+        setSingleItem([])
+      }
+
+      const editTeleprompter = (row) => {
+        setShowList('hide-list')
+        setShowItem('show-add-item')
+        setSingleItem(row)
+        console.log(row)
+        // /project/teleprompter/get_for_single_edit/<int:project_id>/<int:id_>
+        // const config = {
+        //   method: 'get',
+        //   url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/get_for_single_edit/${id}/${row.id}`,
+        //   headers: { 
+        //     Authorization: `Token ${getToken()}`
+        //   }
+        // }
+        
+        // axios(config)
+        // .then(function (response) {
+        //   console.log(response)
+        //   if (response.data.status === 200) {
+        //     // const data = response.data.data
+        //     // const r = []
+        //     // data.forEach(element => {
+        //     //   r.push({
+        //     //     value: element.id,
+        //     //     label: element.name
+        //     //   })
+        //     // })
+        //     setTeleprompter(response.data.data)
+        //     // setCreator(response.data.data.creator)
+        //   } else if (response.data.status === 401) {
+        //     history.push('/login')
+        //   }
+        //   // console.log(JSON.stringify(response.data))
+        // })
+        // .catch(function (error) {
+        //   console.log(error)
+        //   // history.push('/login')
+        // })
+
+      }
+
       const columns = [
         {
           name: 'Name',
@@ -241,7 +288,7 @@ import moment from 'moment'
                     <MoreVertical size={15} />
                   </DropdownToggle>
                   <DropdownMenu right>
-                    <DropdownItem className='w-100' onClick={() => editTeleprompter()}>
+                    <DropdownItem className='w-100' onClick={() => editTeleprompter(row)}>
                       <Edit size={15} />
                       <span className='align-middle ml-50'>Edit</span>
                     </DropdownItem>
@@ -379,9 +426,11 @@ import moment from 'moment'
       <Modal isOpen={show} toggle={() => setShow(!show)} className='modal-dialog-centered modal-lg'>
         <ModalHeader className='bg-transparent' toggle={() => setShow(!show)}></ModalHeader>
         <ModalBody className='px-sm-5 pt-50 pb-5'>
+          
           <div className='text-center mb-2'>
             <h1 className='mb-1'>Teleprompter</h1>
           </div>
+          
           <Card className={showlist}>
             <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
               <CardTitle tag='h4'>List </CardTitle>
@@ -455,7 +504,7 @@ import moment from 'moment'
                   type='text'
                   id='name'
                   name='name'
-                  // defaultValue={selectedUser.email}
+                  defaultValue={singleItem !== [] ? singleItem.name : ''}
                   placeholder='Pre Show 1' 
                   innerRef={register({ required: true })}
                   invalid={errors.item_name && true}
@@ -471,7 +520,7 @@ import moment from 'moment'
                     id='date-time-picker'
                     name='expiry_date' 
                     className='form-control' 
-                    defaultValue={new Date()}
+                    defaultValue={singleItem !== [] ? singleItem.expiry_at : new Date()}
                     innerRef={register({ required: true })}
                     invalid={errors.expiry_date && true}
                     options={{
@@ -491,7 +540,7 @@ import moment from 'moment'
                   type='text'
                   id='users'
                   name='users'
-                  // defaultValue={selectedUser.email}
+                  defaultValue={singleItem !== [] ? singleItem.allowed_users : ''}
                   placeholder='10' 
                   innerRef={register({ required: true })}
                   invalid={errors.users && true}
@@ -503,21 +552,21 @@ import moment from 'moment'
                 <CustomInput inline name='is_open' type='checkbox' id='is_open' label='Is Open'
                   innerRef={register({ required: false })} 
                   invalid={errors.is_open && true} 
-                  defaultChecked={false} 
+                  defaultChecked={singleItem !== [] ? singleItem.is_open : false}
                 />
               </Col>
               <Col md={4} xs={12} className='mt-1 mb-1'>
                 <CustomInput inline name='one_time_use' type='checkbox' id='one_time_use' label='One Time Use'
                   innerRef={register({ required: false })} 
                   invalid={errors.one_time_use && true} 
-                  defaultChecked={false} 
+                  defaultChecked={singleItem !== [] ? singleItem.one_time_use : false}
                 />
               </Col>
               <Col md={4} xs={12} className='mt-1 mb-1'>
                 <CustomInput inline name='is_password_protected' type='checkbox' id='is_password_protected' label='Password Protected'
                   innerRef={register({ required: false })} 
                   invalid={errors.is_password_protected && true} 
-                  defaultChecked={true} 
+                  defaultChecked={singleItem !== [] ? singleItem.is_password_protected : true}
                 />
               </Col>
               <Col md={12} xs={12}>
@@ -530,13 +579,18 @@ import moment from 'moment'
                   name='password'
                   placeholder='' 
                   innerRef={register({ required: false })}
-                  invalid={errors.password && true}
+                  invalid={errors.password && true} 
+                  defaultValue={singleItem !== [] ? singleItem.password : ''}
               />
               
             </Col>
             
               
               <Col xs={12} className='text-center mt-2 pt-50'>
+                <Button type='button' className='me-1' color='secondary' outline 
+                  onClick={() => goback()} style={{marginRight: '20px'}}>
+                  <ArrowLeftCircle size={15} /><span className='align-middle ml-50'>Back</span>
+                </Button>
                 <Button type='submit' className='me-1' color='primary' style={{marginRight: '20px'}}>
                   Submit
                 </Button>
@@ -547,6 +601,9 @@ import moment from 'moment'
                   onClick={() => {
                     // handleReset()
                     setShow(false)
+                    setShowList('show-list')
+                    setShowItem('hide-add-item')
+                    setSingleItem([])
                   }}
                 >
                   Cancel

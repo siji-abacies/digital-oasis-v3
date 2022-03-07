@@ -1,12 +1,6 @@
 // ** React Imports
 import { Fragment, useState, useEffect, forwardRef } from 'react'
 
-// ** Table Data & Columns
-// import { data, columns } from '../data'
-
-// ** Add New Modal Component
-// import AddNewModal from './AddNewModal'
-
 // ** Third Party Components
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
@@ -58,14 +52,6 @@ import moment from 'moment'
 // ** Vars
 const states = ['success', 'danger', 'warning', 'info', 'dark', 'primary', 'secondary']
 
-const status = {
-  1: { title: 'Current', color: 'light-primary' },
-  2: { title: 'Professional', color: 'light-success' },
-  3: { title: 'Rejected', color: 'light-danger' },
-  4: { title: 'Resigned', color: 'light-warning' },
-  5: { title: 'Applied', color: 'light-info' }
-}
-
 const role = {
   1: {
     title: 'System Admin',
@@ -110,16 +96,7 @@ const DataTableWithButtons = () => {
     setError,
     handleSubmit,
     formState: { errors }
-  } = useForm({
-    // defaultValues: {
-    //   username: selectedUser.name,
-    //   // lastName: selectedUser.fullName.split(' ')[1],
-    //   // firstName: selectedUser.fullName.split(' ')[0]
-    //   // username: 'Test',
-    //   lastName: 'LastName',
-    //   firstName: 'First name'
-    // }
-  })
+  } = useForm()
 
   const getDataForEdit = (data) => {
     console.log(data)
@@ -222,7 +199,6 @@ const DataTableWithButtons = () => {
       }
     })
   }
-
   
   // ** Table Common Column
   const columns = [
@@ -322,15 +298,7 @@ const DataTableWithButtons = () => {
 
   // ** Get data on mount
   useEffect(() => {
-    // /project/members/paginated_list/<int:proj_id>
     getProjectMembers()
-    // dispatch(
-    //   getData({
-    //     page: currentPage,
-    //     perPage: rowsPerPage,
-    //     q: searchValue
-    //   })
-    // )
   }, [dispatch])
   
   // ** Function to handle per page
@@ -343,20 +311,6 @@ const DataTableWithButtons = () => {
     //   })
     // )
     setRowsPerPage(parseInt(e.target.value))
-  }
-
-  const onSubmit = data => {
-    if (Object.values(data).every(field => field.length > 0)) {
-      setShow(false)
-    } else {
-      for (const key in data) {
-        if (data[key].length === 0) {
-          setError(key, {
-            type: 'manual'
-          })
-        }
-      }
-    }
   }
 
   // ** Function to handle filter
@@ -483,12 +437,6 @@ const DataTableWithButtons = () => {
     { value: '1', label: 'System Admin', color: '#00B8D9', isFixed: true },
     { value: '2', label: 'Client', color: '#0052CC', isFixed: true },
     { value: '3', label: 'Crew', color: '#5243AA', isFixed: true }
-  ]
-
-  const users = [
-    { value: '1', label: 'Stella Ganderton', color: '#00B8D9', isFixed: true },
-    { value: '2', label: 'Harmonia Nisius', color: '#0052CC', isFixed: true },
-    { value: '3', label: 'Genevra Honeywood', color: '#5243AA', isFixed: true }
   ]
 
   return (
