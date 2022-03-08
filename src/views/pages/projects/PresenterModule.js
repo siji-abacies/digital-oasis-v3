@@ -532,8 +532,6 @@ const columns = [
       previousClassName='page-item prev'
       previousLinkClassName='page-link'
       pageLinkClassName='page-link'
-      breakClassName='page-item'
-      breakLinkClassName='page-link'
       containerClassName='pagination react-paginate separated-pagination pagination-sm justify-content-end pr-1 mt-1'
     />
   )

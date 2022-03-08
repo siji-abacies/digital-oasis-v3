@@ -73,9 +73,10 @@ import {
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [count, setCount] = useState(0)
-  const [isoRecord, setIsoRecord] = useState(true)
-  const [hdRecord, sethdRecord] = useState(false)
-  const [sendMail, setSendMail] = useState(true)
+  const [isoRecord, setIsoRecord] = useState(presenterData.iso_recording)
+  const [hdRecord, sethdRecord] = useState(presenterData.hd_local_recording)
+  const [sendMail, setSendMail] = useState(presenterData.send_email)
+  const [password_protected, setPasswordProtected] = useState(presenterData.is_password_protected)
 
   useEffect(() => {
     let len
@@ -215,6 +216,8 @@ import {
     const onSubmit = data => {
       console.log(customFields)
       console.log(data)
+      console.log(isoRecord)
+      console.log(password_protected)
       const d = {
         first_name: data.firstName,
         last_name: data.lastName,
@@ -224,7 +227,7 @@ import {
         hd_local_recording: hdRecord,
         send_email: sendMail, 
         custom_fields: customFields, 
-        is_password_protected: data.password_protected, 
+        is_password_protected: password_protected, 
         password: data.password
       }
       console.log(d)
@@ -359,9 +362,9 @@ import {
               <CustomInput inline name='iso_record' type='checkbox' id='iso_record' label='ISO Record'
                 innerRef={register({ required: false })} 
                 invalid={errors.iso_record && true} 
-                // defaultChecked={isoRecord}  
+                defaultChecked={isoRecord}  
                 onChange={e => setIsoRecord(e.target.checked)} 
-                defaultChecked={presenterData.iso_recording}
+                // defaultChecked={presenterData.iso_recording}
               />
 
             </Col>
@@ -369,16 +372,16 @@ import {
               <CustomInput inline name='hd_record' type='checkbox' id='hd_record' label='High Quality Local Record'
                 innerRef={register({ required: false })} 
                 invalid={errors.hd_record && true} 
-                // defaultChecked={hdRecord}  
+                defaultChecked={hdRecord}  
                 onChange={e => sethdRecord(e.target.checked)} 
-                defaultChecked={presenterData.hd_local_recording}
+                // defaultChecked={presenterData.hd_local_recording}
               />
             
             </Col>
             <Col md={3} xs={12} className='mt-1'>
               <CustomInput inline type='checkbox' id='send_email' name='send_email' label='Send Email' 
               innerRef={register({ required: false })} 
-                defaultChecked={presenterData.send_email}  
+                defaultChecked={sendMail}  
                 onChange={e => setSendMail(e.target.checked)}/>
 
             </Col>
@@ -403,8 +406,8 @@ import {
               <CustomInput inline name='password_protected' type='checkbox' id='password_protected' label='Password Protected'
                 innerRef={register({ required: false })} 
                 invalid={errors.password_protected && true} 
-                defaultValue={presenterData.is_password_protected} 
-                // onChange={e => setIsoRecord(e.target.checked)} 
+                defaultValue={password_protected} 
+                onChange={e => setPasswordProtected(e.target.checked)} 
               />
 
             </Col>

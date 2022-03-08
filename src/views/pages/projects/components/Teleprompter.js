@@ -348,7 +348,8 @@ import moment from 'moment'
 
     const onSubmit = data => {
       // {/* {"expiry_at": "2021-12-30T12:10:20", "name": "Prompter1", "is_open": False, "is_password_protected": False, "allowed_users": 10, "one_time_use": False, "password": "Aewe12"} */}
-      console.log(moment(data.expiry_date).format("Y-MM-D HH:mm:ss"))
+      // console.log(moment(data.expiry_date).format('Y-m-d\TH:i:s'))
+      console.log(moment(data.expiry_date, 'Asia/kolkata').utc().format('Y-m-d\TH:i:s'))
       console.log(data)
       const d = { 
         name: data.name,
@@ -361,38 +362,38 @@ import moment from 'moment'
       }
       console.log(d)
 
-      const config = {
-        method: 'post',
-        url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/${id}`,
-        headers: { 
-          ContentType: 'application/json',
-          Authorization: `Token ${getToken()}`
-        }, 
-        data : d
-      }
+      // const config = {
+      //   method: 'post',
+      //   url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/${id}`,
+      //   headers: { 
+      //     ContentType: 'application/json',
+      //     Authorization: `Token ${getToken()}`
+      //   }, 
+      //   data : d
+      // }
 
-      axios(config)
-      .then(function (response) {
-      console.log(response)
-      if (response.data.status === 200) {
-        // getProjectMembers()
-        // setShow(false)
-        // toast.success(
-        // <ToastContent message='Project Successfully Added' />,
-        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-        // )
-        } else if (response.data.status === 409) {
-          // toast.success(
-          // <ToastContent message={response.data.message} />,
-          //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-          // )
-        }
-          // console.log(JSON.stringify(response.data))
-      })
-      .catch(function (error) {
-        console.log(error)
-        // history.push('/login')
-      })
+      // axios(config)
+      // .then(function (response) {
+      // console.log(response)
+      // if (response.data.status === 200) {
+      //   // getProjectMembers()
+      //   // setShow(false)
+      //   // toast.success(
+      //   // <ToastContent message='Project Successfully Added' />,
+      //   //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+      //   // )
+      //   } else if (response.data.status === 409) {
+      //     // toast.success(
+      //     // <ToastContent message={response.data.message} />,
+      //     //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+      //     // )
+      //   }
+      //     // console.log(JSON.stringify(response.data))
+      // })
+      // .catch(function (error) {
+      //   console.log(error)
+      //   // history.push('/login')
+      // })
 
 
       // /project/agenda/<int:project_id></int:project_id>
