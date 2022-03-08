@@ -57,7 +57,6 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
   })
 
   // uppy.use(Uppy.Tus, { endpoint: 'https://tusd.tusdemo.net/files/' })
-  // /user/edit_user_details/<user_id>
   uppy.use(thumbnailGenerator)
 
   uppy.on('thumbnail:generated', (file, preview) => {
@@ -71,11 +70,6 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
     const img = result.successful
     const d = img[0].data
     console.log(img[0].data)
-    // const encode_img = JSON.stringify(img[0].data)
-    // console.log(encode_img)
-
-    // const token = "eyJhbGciOiJIUzUxMiIsImlhdCI6MTY0NDM4MDg0MywiZXhwIjoxNjQ0OTg1NjQzfQ.eyJpZCI6NywidXNlcl9yb2xlIjoxfQ.IyzNMBX9p9vXn5mas5emwjzMgF2i6sVi7R74_A6RSqrSHB38SduYb2ub73zNh8jqTMCjHp-c_kJmm15USqomMA"
-
     const formData = new FormData()
     formData.append('file', img[0].data)
 
@@ -83,37 +77,6 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
       file: img[0].data
       // file: d
     }
-
-    // console.log(formData)
-    // console.log(body1)
-    // console.log(body1.file)
-    // const config = {
-    //   method: 'put',
-    //   url: `https://w-call-demo02.herokuapp.com/user/edit_user_details/7`,
-    //   headers: { 
-    //     // AccessControlAllowOrigin: '*',
-    //     // ContentType: 'application/json',
-    //     ContentType: 'multipart/form-data',
-    //     Authorization: `Token ${token}`
-    //   }
-    //   // data: body1.file
-    //   // file: body1
-    //   // body1
-      
-    // }
-
-    // axios(config, formData)
-    // .then(function (response) {
-    //   console.log(response)
-    //   // data = response.data
-    //   // setUserData(data)
-    //   // handleModal()
-    // })
-    // .catch(function (error) {
-    //   console.log(error)
-    // })
-
-
     console.log('successful files:', result.successful)
     console.log('failed files:', result.failed)
   })
@@ -160,7 +123,6 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
             { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
           )
         }
-          // console.log(JSON.stringify(response.data))
       })
       .catch(function (error) {
         console.log(error)
@@ -169,21 +131,9 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
     } else {
       // console.log($('#date-time-picker').next())
     }
-    
-        // if (Object.values(data).every(field => field.length > 0)) {
-        //   setShow(false)
-        // } else {
-        //   for (const key in data) {
-        //     if (data[key].length === 0) {
-        //       setError(key, {
-        //         type: 'manual'
-        //       })
-        //     }
-        //   }
-        // }
-      }
+  }
 
-    return (
+  return (
     <Modal isOpen={show} toggle={() => setShow(!show)} className='modal-dialog-centered modal-lg'>
         <ModalHeader className='bg-transparent' toggle={() => setShow(!show)}></ModalHeader>
         <ModalBody className='px-sm-5 pt-50 pb-5'>

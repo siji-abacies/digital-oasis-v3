@@ -30,7 +30,6 @@ import moment from 'moment'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent }) => {
-  console.log(ToastContent)
   const token = localStorage.getItem('token')
 
   const [picker, setPicker] = useState(new Date())
@@ -61,8 +60,6 @@ const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent 
     // restrictions: { maxNumberOfFiles: 1, allowedFileTypes: ['image/*'] }
   })
 
-  // uppy.use(Uppy.Tus, { endpoint: 'https://tusd.tusdemo.net/files/' })
-  // /user/edit_user_details/<user_id>
   uppy.use(thumbnailGenerator)
 
   uppy.on('thumbnail:generated', (file, preview) => {
@@ -79,8 +76,6 @@ const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent 
     // const encode_img = JSON.stringify(img[0].data)
     // console.log(encode_img)
 
-    const token = "eyJhbGciOiJIUzUxMiIsImlhdCI6MTY0NDM4MDg0MywiZXhwIjoxNjQ0OTg1NjQzfQ.eyJpZCI6NywidXNlcl9yb2xlIjoxfQ.IyzNMBX9p9vXn5mas5emwjzMgF2i6sVi7R74_A6RSqrSHB38SduYb2ub73zNh8jqTMCjHp-c_kJmm15USqomMA"
-
     const formData = new FormData()
     formData.append('file', img[0].data)
 
@@ -88,36 +83,6 @@ const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent 
       file: img[0].data
       // file: d
     }
-
-    // console.log(formData)
-    // console.log(body1)
-    // console.log(body1.file)
-    // const config = {
-    //   method: 'put',
-    //   url: `https://w-call-demo02.herokuapp.com/user/edit_user_details/7`,
-    //   headers: { 
-    //     // AccessControlAllowOrigin: '*',
-    //     // ContentType: 'application/json',
-    //     ContentType: 'multipart/form-data',
-    //     Authorization: `Token ${token}`
-    //   }
-    //   // data: body1.file
-    //   // file: body1
-    //   // body1
-      
-    // }
-
-    // axios(config, formData)
-    // .then(function (response) {
-    //   console.log(response)
-    //   // data = response.data
-    //   // setUserData(data)
-    //   // handleModal()
-    // })
-    // .catch(function (error) {
-    //   console.log(error)
-    // })
-
 
     console.log('successful files:', result.successful)
     console.log('failed files:', result.failed)
@@ -129,19 +94,9 @@ const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent 
         setError,
         handleSubmit,
         formState: { errors }
-      } = useForm({
-        // defaultValues: {
-        //   username: selectedUser.name,
-        //   // lastName: selectedUser.fullName.split(' ')[1],
-        //   // firstName: selectedUser.fullName.split(' ')[0]
-        //   // username: 'Test',
-        //   lastName: 'LastName',
-        //   firstName: 'First name'
-        // }
-      })
+      } = useForm()
       
     const onSubmit = data => {
-      // /project/<int:project_id>?time_zone=Asia/Kolkata
       console.log(data)
       const d = {
         name: data.project_name,
@@ -222,7 +177,7 @@ const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent 
                 <Input
                   type='text'
                   id='project_desc'
-                  name='project_desc'
+                  name='description'
                   defaultValue={projectData.description}
                   placeholder='Project Description' 
                   innerRef={register({ required: false })}
