@@ -77,6 +77,7 @@ import {
   const [hdRecord, sethdRecord] = useState(presenterData.hd_local_recording)
   const [sendMail, setSendMail] = useState(presenterData.send_email)
   const [password_protected, setPasswordProtected] = useState(presenterData.is_password_protected)
+  const [checked, setChecked] = useState(true)
 
   useEffect(() => {
     let len
@@ -229,6 +230,12 @@ import {
         custom_fields: customFields, 
         is_password_protected: password_protected, 
         password: data.password
+      }
+
+      if (password_protected === true) {
+        setChecked(true)
+      } else {
+        setChecked(false)
       }
       console.log(d)
 
@@ -407,6 +414,7 @@ import {
                 innerRef={register({ required: false })} 
                 invalid={errors.password_protected && true} 
                 defaultValue={password_protected} 
+                defaultChecked = {checked} 
                 onChange={e => setPasswordProtected(e.target.checked)} 
               />
 
