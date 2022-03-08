@@ -119,8 +119,9 @@ const DataTableWithButtons = () => {
   const handleModal = () => setModal(!modal)
   const [picker, setPicker] = useState(new Date())
   const [count, setCount] = useState(1)
-  const [rowsPerPage, setRowsPerPage] = useState(7)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
   const [data, setData] = useState([])
+  const [total, setTotal] = useState(10)
   const [allowContent, setAllowContent] = useState(false)
   const [dataforEdit, setDataForEdit] = useState([])
 
@@ -139,10 +140,12 @@ const DataTableWithButtons = () => {
     }
   }
 
-  const getPresenters = () => {
+  const getPresenters = (page, rowsPerPage) => {
+    console.log(page)
+    console.log(rowsPerPage)
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/presenter/list/${id}?time_zone=Asia/Kolkata&page=1&per_page=10`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/presenter/list/${id}?time_zone=Asia/Kolkata&page=${page}&per_page=${rowsPerPage}`,
       headers: { 
         Authorization: `Token ${getToken()}`
       }
@@ -154,6 +157,7 @@ const DataTableWithButtons = () => {
       if (response.data.status === 200) {
         
         setData(response.data.data)
+        setTotal(response.data.pagination.total)
         setAllowContent(true)
         // setCreator(response.data.data.creator)
       } else if (response.data.status === 401) {
@@ -171,7 +175,7 @@ const DataTableWithButtons = () => {
 
   // ** Get data on mount
   useEffect(() => {
-    getPresenters(1, 10)
+    getPresenters(1, rowsPerPage)
     // dispatch(
     //   getData({
     //     page: currentPage,
@@ -183,7 +187,7 @@ const DataTableWithButtons = () => {
   
   // ** Function to handle per page
   const handlePerPage = e => {
-    getPresenters()
+    // getPresenters()
     // dispatch(
     //   getData({
     //     page: currentPage,
@@ -192,6 +196,7 @@ const DataTableWithButtons = () => {
     //   })
     // )
     setRowsPerPage(parseInt(e.target.value))
+    getPresenters(1, e.target.value)
   }
 
   const {
@@ -518,6 +523,7 @@ const columns = [
   // ** Function to handle Pagination
   const handlePagination = page => {
     setCurrentPage(page.selected)
+    getPresenters(page.selected + 1, rowsPerPage)
   }
 
   // ** Custom Pagination
@@ -527,7 +533,7 @@ const columns = [
       nextLabel=''
       forcePage={currentPage}
       onPageChange={page => handlePagination(page)}
-      pageCount={searchValue.length ? filteredData.length / 7 : data.length / 7 || 1}
+      pageCount={searchValue.length ? filteredData.length / rowsPerPage : total / rowsPerPage || 1}
       breakLabel='...'
       pageRangeDisplayed={2}
       marginPagesDisplayed={2}
@@ -695,7 +701,7 @@ const columns = [
           pagination
           // selectableRows
           columns={columns}
-          paginationPerPage={7}
+          paginationPerPage={rowsPerPage}
           className='react-dataTable'
           sortIcon={<ChevronDown size={10} />}
           paginationDefaultPage={currentPage + 1}

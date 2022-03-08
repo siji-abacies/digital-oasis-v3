@@ -47,7 +47,7 @@ import {
   import axios from 'axios'
   import { useDispatch } from 'react-redux'
   import { toast, Slide } from 'react-toastify'
-  
+
   const AddNewModal = ({ show, setShow, presenterData, getPresenters, ToastContent }) => {
     
   const dispatch = useDispatch()
@@ -437,7 +437,7 @@ import {
               <Repeater count={count}>
                 {i => {
                   console.log(i)
-                  console.log(customFields)
+                  console.log(customFields[i])
                   const Tag = i === 0 ? 'div' : SlideDown
                   return (
                     <Tag key={i}>
