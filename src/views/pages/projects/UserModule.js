@@ -83,8 +83,9 @@ const DataTableWithButtons = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [searchValue, setSearchValue] = useState('')
   const [data, setData] = useState([])
+  const [total, setTotal] = useState(10)
   const [filteredData, setFilteredData] = useState([])
-  const [rowsPerPage, setRowsPerPage] = useState(7)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const [show, setShow] = useState(false)
   const [editShow, setEditShow] = useState(false)
@@ -272,10 +273,10 @@ const DataTableWithButtons = () => {
     }
   ]
 
-  const getProjectMembers = () => {
+  const getProjectMembers = (page, rowsPerPage) => {
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/paginated_list/${id}?time_zone=Asia/Kolkata`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/paginated_list/${id}?time_zone=Asia/Kolkata&page=${page}&per_page=${rowsPerPage} `,
       headers: { 
         Authorization: `Token ${getToken()}`
       }
@@ -287,6 +288,7 @@ const DataTableWithButtons = () => {
       if (response.data.status === 200) {
         
         setData(response.data.data)
+        setTotal(response.data.pagination.total)
         // setCreator(response.data.data.creator)
       } else if (response.data.status === 401) {
         history.push('/login')
@@ -301,7 +303,7 @@ const DataTableWithButtons = () => {
 
   // ** Get data on mount
   useEffect(() => {
-    getProjectMembers()
+    getProjectMembers(1, rowsPerPage)
   }, [dispatch])
   
   // ** Function to handle per page
@@ -314,6 +316,7 @@ const DataTableWithButtons = () => {
     //   })
     // )
     setRowsPerPage(parseInt(e.target.value))
+    getProjectMembers(1, e.target.value)
   }
 
   // ** Function to handle filter
@@ -369,6 +372,7 @@ const DataTableWithButtons = () => {
   // ** Function to handle Pagination
   const handlePagination = page => {
     setCurrentPage(page.selected)
+    getProjectMembers(page.selected + 1, rowsPerPage)
   }
 
   // ** Custom Pagination
@@ -378,7 +382,7 @@ const DataTableWithButtons = () => {
       nextLabel=''
       forcePage={currentPage}
       onPageChange={page => handlePagination(page)}
-      pageCount={searchValue.length ? filteredData.length / 7 : data.length / 7 || 1}
+      pageCount={searchValue.length ? filteredData.length / rowsPerPage : total / rowsPerPage || 1}
       breakLabel='...'
       pageRangeDisplayed={2}
       marginPagesDisplayed={2}
@@ -502,7 +506,7 @@ const DataTableWithButtons = () => {
           pagination
           // selectableRows
           columns={columns}
-          paginationPerPage={7}
+          paginationPerPage={rowsPerPage}
           className='react-dataTable'
           sortIcon={<ChevronDown size={10} />}
           paginationDefaultPage={currentPage + 1}
