@@ -43,6 +43,7 @@ import '@styles/react/libs/flatpickr/flatpickr.scss'
 import { useDispatch } from 'react-redux'
 import { format } from 'date-fns'
 import moment from 'moment'
+import ReactPaginate from 'react-paginate'
 
 const MySwal = withReactContent(Swal)
 const type = {
@@ -90,7 +91,9 @@ const Projects = () => {
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [dataforEdit, setDataForEdit] = useState([])
-
+  const [currentPage, setCurrentPage] = useState(0)
+  const [searchValue, setSearchValue] = useState('')
+  const [filteredData, setFilteredData] = useState([])
   const onColorChange = (updatedColor) => {
     setColor(updatedColor)
   }
@@ -120,7 +123,7 @@ const Projects = () => {
   const getProjectList = (page) => {
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/dashboard?page=1&per_page=6`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/dashboard?page=${page}&per_page=6`,
       headers: { 
         Authorization: `Token ${token}`
       }
@@ -260,29 +263,6 @@ const Projects = () => {
     })
   }
 
-  const renderPagination = (projectList) => {
-    // console.log(projectList)
-    if (projectList.data && projectList.data.length > 0) {
-      const page_count = projectList.pagination.total / 6
-      const p_count = parseInt(page_count) > 1 ? parseInt(page_count) : 1
-      console.log(p_count)
-      console.log(projectList)
-      let index
-      
-      for (index = 1; index <= p_count + 1; index++) {
-        console.log(index)
-        return (
-      
-          <PaginationItem>
-            <PaginationLink href='#'>{index}</PaginationLink>
-          </PaginationItem>
-        
-        )
-      }
-      // control.log('index2:'+index)
-    }
-  }
-
   const renderProjects = (projectList) => {
     console.log(projectList)
     if (projectList !== undefined && projectList.length > 0) {
@@ -365,7 +345,13 @@ const Projects = () => {
     }
   }
 
-  // console.log(projectList)
+  // ** Function to handle Pagination
+  const handlePagination = page => {
+    setCurrentPage(page.selected)
+    getProjectList(page.selected + 1)
+  }
+
+  console.log(projectList.pagination)
   return (
     <Fragment>
       <div>
@@ -385,6 +371,28 @@ const Projects = () => {
         {renderProjects(projectList.data)}
         
       </Row>
+      {projectList.data !== [] && projectList.pagination !== undefined &&
+        <ReactPaginate 
+          previousLabel=''
+          nextLabel=''
+          forcePage={currentPage}
+          onPageChange={page => handlePagination(page)}
+          pageCount={searchValue.length ? filteredData.length / 10 : projectList.pagination.total / 6 || 1}
+          breakLabel='...'
+          pageRangeDisplayed={2}
+          marginPagesDisplayed={2}
+          activeClassName='active'
+          pageClassName='page-item'
+          breakClassName='page-item'
+          breakLinkClassName='page-link'
+          nextLinkClassName='page-link'
+          nextClassName='page-item next'
+          previousClassName='page-item prev'
+          previousLinkClassName='page-link'
+          pageLinkClassName='page-link'
+          containerClassName='pagination react-paginate separated-pagination pagination-sm justify-content-center pr-1 mt-1'
+        />
+        }
       <AddProject
         show={show} 
         setShow={setShow} 
@@ -401,20 +409,6 @@ const Projects = () => {
         ToastContent={ToastContent}
       />
 
-      {projectList.data !== [] && 
-        <Pagination className='d-flex mt-3 justify-content-center'>
-          <PaginationItem className='prev-item'>
-            <PaginationLink href='#'></PaginationLink>
-          </PaginationItem>
-
-          {renderPagination(projectList)}
-
-          <PaginationItem className='next-item'>
-          <PaginationLink href='#'></PaginationLink>
-        </PaginationItem>
-      </Pagination>
-      }
-  
     </Fragment>
   )
 }
