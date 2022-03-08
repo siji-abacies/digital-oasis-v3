@@ -158,6 +158,7 @@ const DataTableWithButtons = () => {
         
         setData(response.data.data)
         setTotal(response.data.pagination.total)
+        
         setAllowContent(true)
         // setCreator(response.data.data.creator)
       } else if (response.data.status === 401) {
@@ -173,6 +174,8 @@ const DataTableWithButtons = () => {
     })
   }
 
+  console.log(data)
+  console.log(total)
   // ** Get data on mount
   useEffect(() => {
     getPresenters(1, rowsPerPage)
