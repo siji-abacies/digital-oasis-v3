@@ -49,7 +49,7 @@ import axios from 'axios'
   const [basic, setBasic] = useState(new Date())
   const [rooms, setRooms] = useState([])
   const [inputFields, setInputFields] = useState([{ key: '', value: '' }])
-
+  const [teleprompter, setTeleprompter] = useState([])
   const stage = [
     { value: '1', label: 'Room 1' },
     { value: '2', label: 'Room 2' },
@@ -230,10 +230,44 @@ import axios from 'axios'
       })
     }
 
+    const listTeleprompter = () => {
+      const config = {
+        method: 'get',
+        url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/for_assigning/${id}`,
+        headers: { 
+          Authorization: `Token ${getToken()}`
+        }
+      }
+      
+      axios(config)
+      .then(function (response) {
+        console.log(response)
+        if (response.data.status === 200) {
+          const data = response.data.data
+          const teleprom = []
+          data.forEach(element => {
+            teleprom.push({
+              value: element.id,
+              label: element.name
+            })
+          })
+          setTeleprompter(teleprom)
+          // setCreator(response.data.data.creator)
+        } else if (response.data.status === 401) {
+          history.push('/login')
+        }
+        // console.log(JSON.stringify(response.data))
+      })
+      .catch(function (error) {
+        console.log(error)
+        // history.push('/login')
+      })
+    }
+
     useEffect(() => {
       // console.log(memberData.user_role)
       listRooms()
-      
+      listTeleprompter()
     }, [])
 
     const onSubmit = data => {
@@ -331,7 +365,7 @@ import axios from 'axios'
                     control={control}
                     defaultValue={picker}
                     id='date-time-picker'
-                    id='date-time-picker'
+                    // id='date-time-picker'
                     name='start_at'
                     innerRef={register({ required: true })}
                     invalid={errors.start_at && true}
@@ -452,11 +486,16 @@ import axios from 'axios'
                 <Label className='form-label' for='teleprompter'>
                   Select Teleprompter
                 </Label>
-                <Input
-                  type='text'
-                  id='teleprompter'
-                  // defaultValue={selectedUser.email}
-                  placeholder='Lorem Ipsum'
+                
+                <Select
+                  isClearable={false}
+                  theme={selectThemeColors}
+                  // defaultValue={[users[2]]}
+                  // isMulti
+                  name='teleprompter'
+                  options={teleprompter}
+                  className='react-select'
+                  classNamePrefix='select'
                 />
                 </FormGroup>
             </Col>
