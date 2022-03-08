@@ -158,7 +158,7 @@ import axios from 'axios'
       console.log(d)
       const config = {
         method: 'post',
-        url: `https://digital-oasis-dev.herokuapp.com/v3/project/room${id}`,
+        url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/${id}`,
         headers: { 
           ContentType: 'application/json',
           Authorization: `Token ${getToken()}`

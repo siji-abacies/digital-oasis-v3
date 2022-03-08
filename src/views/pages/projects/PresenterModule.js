@@ -348,15 +348,15 @@ const columns = [
     sortable: true,
     minWidth: '150px'
   },
-  {
-    name: 'Email Status',
-    selector: 'email_status',
-    sortable: true,
-    minWidth: '100px'
-  },
+  // {
+  //   name: 'Email Status',
+  //   selector: 'email_status',
+  //   sortable: true,
+  //   minWidth: '100px'
+  // },
   {
     name: 'Updated',
-    selector: 'start_date',
+    selector: 'updated_at',
     sortable: true,
     minWidth: '150px'
   },

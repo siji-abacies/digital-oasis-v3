@@ -51,13 +51,14 @@ import axios from 'axios'
     // const [show, setShow] = useState(false)
     const [picker, setPicker] = useState(new Date())
 
-  const [color, setColor] = useState(roomData.color)
+  const [color, setColor] = useState('')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [type, setType] = useState(false)
 
   useEffect(() => {
-     if (roomData && roomData.type_ === 1) {
+     if (roomData && roomData.type_ === 1 && roomData.color) {
       setType(true)
+      setColor(roomData.color)
      } else {
        setType(false)
      }
