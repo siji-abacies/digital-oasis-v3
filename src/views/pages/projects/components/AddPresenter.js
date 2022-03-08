@@ -42,10 +42,11 @@ import {
 
   import 'uppy/dist/uppy.css'
   import '@uppy/status-bar/dist/style.css'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { useParams } from 'react-router-dom'
-import axios from 'axios'
-  const AddNewModal = ({ show, setShow }) => {
+  import { yupResolver } from '@hookform/resolvers/yup'
+  import { useParams } from 'react-router-dom'
+  import axios from 'axios'
+  import { toast, Slide } from 'react-toastify'
+  const AddNewModal = ({ show, setShow, getPresenters, ToastContent}) => {
   const { id } = useParams()
 
     const type = [
@@ -210,17 +211,19 @@ import axios from 'axios'
       .then(function (response) {
       console.log(response)
       if (response.data.status === 200) {
+        getPresenters()
         // getProjectMembers()
         setShow(false)
-        // toast.success(
-        // <ToastContent message='Project Successfully Added' />,
-        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-        // )
+        console.log(ToastContent)
+        toast.success(
+        <ToastContent message='Presenter Successfully Added' />,
+          { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+        )
         } else if (response.data.status === 409) {
-          // toast.success(
-          // <ToastContent message={response.data.message} />,
-          //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-          // )
+          toast.success(
+          <ToastContent message={response.data.message} />,
+            { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+          )
         }
           // console.log(JSON.stringify(response.data))
       })

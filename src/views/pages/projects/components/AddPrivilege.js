@@ -85,7 +85,8 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
     const picker1 = colorPkr === 'colorPkrClose' ? 'colorPkrShow' : 'colorPkrClose'
     setColorPkr(picker1)
   }
-
+  const [project_m_id, setProjectMID] = useState([])
+  const [project_add_g, setProjectAddGroup] = useState([])
   const getUserFilterByRole = (role) => {
     // /project/members/privilege_groups/<int:project_id>
     const config = {
@@ -133,19 +134,25 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
   const { register, errors, handleSubmit, control } = useForm()
       
   const onChangePrivilege = (index, e) => {
-    console.log(index, e)
+    // console.log(index, e)
     // const values = [...inputFields]
     // values.push({ key: '', value: '' })
+    
     const permission_values = []
     e.forEach(element => {
-      permission_values.push(element.value)
+      console.log(element.value)
+      // permission_values.push(element.value)
+      project_m_id.push(index)
+      project_add_g.push(element.value)
+      // prj_id.push(index)
     })
-    // console.log(permission_values)
+    
     const d = {
-      project_member_id: index, 
+      project_member_id: project_m_id, 
       remove_groups: [], 
-      add_groups: permission_values
+      add_groups: project_add_g
     }
+    
     console.log(d)
     inputData.push(d)
     console.log(inputData)
@@ -157,7 +164,7 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
   // }
 
   const onSubmit = data => {
-    console.log(JSON.stringify(data, null, 4))
+    console.log(JSON.stringify(inputData))
     // console.log(data)
     // // [ { "project_member_id": id, "remove_groups": [group_id_1, group_id_2], "add_groups": [permission_group_id] } ]
     // if (data.members !== undefined) {
@@ -230,7 +237,8 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
           <h1 className='mb-1'>Privilege Settings</h1>
         </div>
         {/* <Form onSubmit={handleSubmit(onSubmit)}> */}
-        <Form onSubmit={handleSubmit(onSubmit)}>
+        {/* <Form onSubmit={handleSubmit(onSubmit)}> */}
+        <Form onSubmit={onSubmit}>
         {/* <p className='fw-bolder pt-50 mt-2'>12 Members</p> */}
           <ListGroup flush className='mb-2'>
             {memberPrevileges.map((item, index) => {

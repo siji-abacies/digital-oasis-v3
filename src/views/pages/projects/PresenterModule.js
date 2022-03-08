@@ -61,6 +61,7 @@ import axios from 'axios'
 
 const MySwal = withReactContent(Swal)
 
+
 // ** Bootstrap Checkbox Component
 // const BootstrapCheckbox = forwardRef(({ onClick, ...rest }, ref) => (
 //   <div className='custom-control custom-checkbox'>
@@ -80,6 +81,26 @@ const status = {
   5: { title: 'Applied', color: 'light-info' }
 }
 
+const ToastContent = ({ message = null }) => (
+  
+  
+  <>
+  {message !== null && (
+  <Fragment>
+      <div className='toastify-header'>
+      <div className='title-wrapper'>
+          {/* <Avatar size='sm' color='warning' icon={<Coffee size={12} />} /> */}
+          <h6 className='toast-title fw-bold'>{message}</h6>
+      </div>
+      </div>
+      <div className='toastify-body'>
+      {/* <span>You have successfully logged in as an user to Vuexy. Now you can start to explore. Enjoy!</span> */}
+      </div>
+  </Fragment>
+  )}
+  </>
+)
+
 const DataTableWithButtons = () => {
   const dispatch = useDispatch()
   const { id } = useParams()
@@ -98,8 +119,9 @@ const DataTableWithButtons = () => {
   const handleModal = () => setModal(!modal)
   const [picker, setPicker] = useState(new Date())
   const [count, setCount] = useState(1)
-  const [rowsPerPage, setRowsPerPage] = useState(7)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
   const [data, setData] = useState([])
+  const [total, setTotal] = useState(10)
   const [allowContent, setAllowContent] = useState(false)
   const [dataforEdit, setDataForEdit] = useState([])
 
@@ -118,10 +140,12 @@ const DataTableWithButtons = () => {
     }
   }
 
-  const getPresenters = () => {
+  const getPresenters = (page, rowsPerPage) => {
+    console.log(page)
+    console.log(rowsPerPage)
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/presenter/list/${id}?time_zone=Asia/Kolkata`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/presenter/list/${id}?time_zone=Asia/Kolkata&page=${page}&per_page=${rowsPerPage}`,
       headers: { 
         Authorization: `Token ${getToken()}`
       }
@@ -133,6 +157,7 @@ const DataTableWithButtons = () => {
       if (response.data.status === 200) {
         
         setData(response.data.data)
+        setTotal(response.data.pagination.total)
         setAllowContent(true)
         // setCreator(response.data.data.creator)
       } else if (response.data.status === 401) {
@@ -150,7 +175,7 @@ const DataTableWithButtons = () => {
 
   // ** Get data on mount
   useEffect(() => {
-    getPresenters()
+    getPresenters(1, rowsPerPage)
     // dispatch(
     //   getData({
     //     page: currentPage,
@@ -162,6 +187,7 @@ const DataTableWithButtons = () => {
   
   // ** Function to handle per page
   const handlePerPage = e => {
+    // getPresenters()
     // dispatch(
     //   getData({
     //     page: currentPage,
@@ -170,6 +196,7 @@ const DataTableWithButtons = () => {
     //   })
     // )
     setRowsPerPage(parseInt(e.target.value))
+    getPresenters(1, e.target.value)
   }
 
   const {
@@ -295,7 +322,7 @@ const DataTableWithButtons = () => {
 const columns = [
   {
     name: 'Name',
-    selector: 'full_name',
+    selector: 'first_name',
     sortable: true,
     minWidth: '250px',
     cell: row => (
@@ -347,8 +374,11 @@ const columns = [
               <MoreVertical size={15} />
             </DropdownToggle>
             <DropdownMenu right>
-                  <DropdownItem className='w-100' onClick={() => getDataForEdit(row)}>Edit</DropdownItem>
-                  <DropdownItem className='w-100' onClick={() => handleConfirmCancel(row)} >Delete</DropdownItem>
+                  <DropdownItem className='w-100' onClick={() => getDataForEdit(row)}><Edit size={15} />
+                  <span className='align-middle ml-50'>Edit</span>
+                </DropdownItem>
+                  <DropdownItem className='w-100' onClick={() => handleConfirmCancel(row)} ><Trash size={15} />
+                  <span className='align-middle ml-50'>Delete</span></DropdownItem>
             </DropdownMenu>
           </UncontrolledDropdown>
         </div>
@@ -458,22 +488,26 @@ const columns = [
     if (value.length) {
       updatedData = data.filter(item => {
         const startsWith =
-          item.full_name.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.post.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.email.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.age.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.salary.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.start_date.toLowerCase().startsWith(value.toLowerCase()) ||
-          status[item.status].title.toLowerCase().startsWith(value.toLowerCase())
+          item.first_name.toLowerCase().startsWith(value) ||
+          item.last_name.toLowerCase().startsWith(value) ||
+          item.email.toLowerCase().startsWith(value)
+          // item.post.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.email.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.age.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.salary.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.start_date.toLowerCase().startsWith(value.toLowerCase()) ||
+          // status[item.status].title.toLowerCase().startsWith(value.toLowerCase())
 
         const includes =
-          item.full_name.toLowerCase().includes(value.toLowerCase()) ||
-          item.post.toLowerCase().includes(value.toLowerCase()) ||
-          item.email.toLowerCase().includes(value.toLowerCase()) ||
-          item.age.toLowerCase().includes(value.toLowerCase()) ||
-          item.salary.toLowerCase().includes(value.toLowerCase()) ||
-          item.start_date.toLowerCase().includes(value.toLowerCase()) ||
-          status[item.status].title.toLowerCase().includes(value.toLowerCase())
+          item.first_name.toLowerCase().includes(value) ||
+          item.last_name.toLowerCase().startsWith(value) ||
+          item.email.toLowerCase().includes(value) 
+          // item.post.toLowerCase().includes(value.toLowerCase()) ||
+          // item.email.toLowerCase().includes(value.toLowerCase()) ||
+          // item.age.toLowerCase().includes(value.toLowerCase()) ||
+          // item.salary.toLowerCase().includes(value.toLowerCase()) ||
+          // item.start_date.toLowerCase().includes(value.toLowerCase()) ||
+          // status[item.status].title.toLowerCase().includes(value.toLowerCase())
 
         if (startsWith) {
           return startsWith
@@ -489,6 +523,7 @@ const columns = [
   // ** Function to handle Pagination
   const handlePagination = page => {
     setCurrentPage(page.selected)
+    getPresenters(page.selected + 1, rowsPerPage)
   }
 
   // ** Custom Pagination
@@ -498,7 +533,7 @@ const columns = [
       nextLabel=''
       forcePage={currentPage}
       onPageChange={page => handlePagination(page)}
-      pageCount={searchValue.length ? filteredData.length / 7 : data.length / 7 || 1}
+      pageCount={searchValue.length ? filteredData.length / rowsPerPage : total / rowsPerPage || 1}
       breakLabel='...'
       pageRangeDisplayed={2}
       marginPagesDisplayed={2}
@@ -666,7 +701,7 @@ const columns = [
           pagination
           // selectableRows
           columns={columns}
-          paginationPerPage={7}
+          paginationPerPage={rowsPerPage}
           className='react-dataTable'
           sortIcon={<ChevronDown size={10} />}
           paginationDefaultPage={currentPage + 1}
@@ -675,8 +710,8 @@ const columns = [
           // selectableRowsComponent={BootstrapCheckbox}
         />
       </Card>
-      <AddPresenter show={show} setShow={setShow}/>
-      <EditPresenter show={editShow} setShow={setEditShow} presenterData={dataforEdit} />
+      <AddPresenter show={show} setShow={setShow} getPresenters={getPresenters} ToastContent={ToastContent}/>
+      <EditPresenter show={editShow} setShow={setEditShow} presenterData={dataforEdit} getPresenters={getPresenters} ToastContent={ToastContent}/>
      
       {/* <AddNewModal open={modal} handleModal={handleModal} /> */}
       </>
