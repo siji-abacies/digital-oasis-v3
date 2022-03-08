@@ -228,7 +228,7 @@ import {
         hd_local_recording: hdRecord,
         send_email: sendMail, 
         custom_fields: customFields, 
-        is_password_protected: password_protected, 
+        is_password_protected: JSON.parse(data.password_protected), 
         password: data.password
       }
 

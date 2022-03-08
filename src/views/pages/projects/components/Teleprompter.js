@@ -46,6 +46,11 @@ import { useParams } from 'react-router-dom'
 import axios from 'axios'
 import DataTable from 'react-data-table-component'
 import moment from 'moment'
+import { tz } from 'moment-timezone'
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+import '@styles/react/libs/flatpickr/flatpickr.scss'
+const MySwal = withReactContent(Swal)
 
   const AddNewModal = ({ show, setShow }) => {
     const { id } = useParams()
@@ -219,6 +224,10 @@ import moment from 'moment'
         setShowItem('show-add-item')
         setSingleItem(row)
         console.log(row)
+        // console.log(moment(row.expiry_at).format('d/m/Y h:m:s'))
+        
+        // console.log(row.expiry_at, moment(row.expiry_at, 'Y-MM-D HH:mm:ss').tz('Asia/Kolkata').format('Y-MM-D HH:mm:ss'))
+        
         // /project/teleprompter/get_for_single_edit/<int:project_id>/<int:id_>
         // const config = {
         //   method: 'get',
@@ -254,6 +263,81 @@ import moment from 'moment'
 
       }
 
+      // /project/teleprompter/<project_id>/<id_>
+      const handleConfirmCancel = (row) => {
+        // console.log(row)
+        return MySwal.fire({
+          title: 'Are you sure?',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, delete it!',
+          customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-danger ml-1'
+          },
+          buttonsStyling: false
+        }).then(function (result) {
+          if (result.value) {
+      
+            axios({ 
+              method: 'delete',
+              url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/${id}/${row.id}`,
+              headers: { 
+                          ContentType : 'application/json', 
+                          Authorization: `Token ${getToken()}` 
+                        }
+              
+            })
+            .then(response => {
+              console.log(response)
+              if (response.data.status === 200) {
+                getUserList(1)
+                getUserCount()
+                MySwal.fire({
+                  icon: 'success',
+                  title: 'Deleted!',
+                  text: 'User has been deleted.',
+                  customClass: {
+                    confirmButton: 'btn btn-success'
+                  }
+                })
+                
+              } else if (response.data.status > 200 && response.data.status > 299) {
+                // this.showToast("warning", response.data.message)
+              } else throw response.data
+            })
+            .catch(error => {
+              console.log(error)
+              if (error && error.status === 401) {
+                  // this.setState({areaLoading: false})  
+                  // this.showToast("error", error.message)
+                  // localStorage.removeItem('authProject');
+              }
+              if (error) {
+                  // this.setState({areaLoading: false})  
+                  // this.showToast("error", error.message)
+              } else {
+                  // this.setState({areaLoading: false})  
+                  // this.showToast("error", error.message)
+              }
+            })
+      
+            
+          } else if (result.dismiss === MySwal.DismissReason.cancel) {
+            MySwal.fire({
+              title: 'Cancelled',
+              text: 'User Delete Cancelled',
+              icon: 'error',
+              customClass: {
+                confirmButton: 'btn btn-success'
+              }
+            })
+          }
+        })
+      }
+
+      
       const columns = [
         {
           name: 'Name',
@@ -347,13 +431,21 @@ import moment from 'moment'
     }, [])
 
     const onSubmit = data => {
+      console.log(singleItem)
       // {/* {"expiry_at": "2021-12-30T12:10:20", "name": "Prompter1", "is_open": False, "is_password_protected": False, "allowed_users": 10, "one_time_use": False, "password": "Aewe12"} */}
       // console.log(moment(data.expiry_date).format('Y-m-d\TH:i:s'))
-      console.log(moment(data.expiry_date, 'Asia/kolkata').utc().format('Y-m-d\TH:i:s'))
-      console.log(data)
+      // const local_time = moment.tz(data.expiry_at, null, 'Asia/kolkata')
+      let utc_time = JSON.stringify(data.expiry_date)
+      console.log(utc_time)
+      utc_time = utc_time.slice(2, 21)
+      
+      // const l = new Date(local_time, 'Asia/kolkata')
+      // console.log(data.expiry_date, moment(data.expiry_date[0]).format('Y-MM-D\THH:mm:ss'), JSON.stringify(data.expiry_date))
+      // console.log(moment(data.expiry_at).format('Y-MM-D\THH:mm:ss'))
+      console.log(data, utc_time)
       const d = { 
         name: data.name,
-        expiry_at: moment(data.expiry_date).format("Y-MM-D HH:mm:ss"),
+        expiry_at: utc_time,
         is_open: data.is_open, 
         is_password_protected: data.is_password_protected, 
         allowed_users: data.users, 
@@ -362,38 +454,44 @@ import moment from 'moment'
       }
       console.log(d)
 
-      // const config = {
-      //   method: 'post',
-      //   url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/${id}`,
-      //   headers: { 
-      //     ContentType: 'application/json',
-      //     Authorization: `Token ${getToken()}`
-      //   }, 
-      //   data : d
-      // }
+      const url = singleItem !== [] ? `project/teleprompter/${singleItem.id}/${id}` : `project/teleprompter/${id}`
+      const _method = singleItem !== [] ? 'put' : 'post'
+      const config = {
+        method: _method,
+        url: `https://digital-oasis-dev.herokuapp.com/v3/${url}`,
+        headers: { 
+          ContentType: 'application/json',
+          Authorization: `Token ${getToken()}`
+        }, 
+        data : d
+      }
 
-      // axios(config)
-      // .then(function (response) {
-      // console.log(response)
-      // if (response.data.status === 200) {
-      //   // getProjectMembers()
-      //   // setShow(false)
-      //   // toast.success(
-      //   // <ToastContent message='Project Successfully Added' />,
-      //   //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-      //   // )
-      //   } else if (response.data.status === 409) {
-      //     // toast.success(
-      //     // <ToastContent message={response.data.message} />,
-      //     //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-      //     // )
-      //   }
-      //     // console.log(JSON.stringify(response.data))
-      // })
-      // .catch(function (error) {
-      //   console.log(error)
-      //   // history.push('/login')
-      // })
+      console.log(config)
+      axios(config)
+      .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        listTeleprompter()
+        setShowList('show-list')
+        setShowItem('hide-add-item')
+        setSingleItem([])
+        // setShow(false)
+        // toast.success(
+        // <ToastContent message='Project Successfully Added' />,
+        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+        // )
+        } else if (response.data.status === 409) {
+          // toast.success(
+          // <ToastContent message={response.data.message} />,
+          //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+          // )
+        }
+          // console.log(JSON.stringify(response.data))
+      })
+      .catch(function (error) {
+        console.log(error)
+        // history.push('/login')
+      })
 
 
       // /project/agenda/<int:project_id></int:project_id>
@@ -516,16 +614,20 @@ import moment from 'moment'
                 <FormGroup>
                   <Label for='date-time-picker'>Expiry Date</Label>
                   <Controller
-                    as={Flatpickr}
+                    as={Flatpickr} 
+                    data-enable-time
                     control={control}
                     id='date-time-picker'
                     name='expiry_date' 
                     className='form-control' 
                     defaultValue={singleItem !== [] ? singleItem.expiry_at : new Date()}
+                    // defaultValue={singleItem.expiry_at}
                     innerRef={register({ required: true })}
                     invalid={errors.expiry_date && true}
                     options={{
                       altFormat: "d/m/Y h:i K",
+                      // altFormat: 'd/m/Y h:m:s',
+                      // altFormat: 'Y-MM-D HH:mm:ss',
                       altInput: true
                       // dateFormat: "Y-m-d"
                     }} 
