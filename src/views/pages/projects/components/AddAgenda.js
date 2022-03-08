@@ -48,6 +48,7 @@ import axios from 'axios'
     const { id } = useParams()
   const [basic, setBasic] = useState(new Date())
   const [rooms, setRooms] = useState([])
+  const [inputFields, setInputFields] = useState([{ key: '', value: '' }])
 
   const stage = [
     { value: '1', label: 'Room 1' },
@@ -83,6 +84,9 @@ import axios from 'axios'
 
   const increaseCount = () => {
     setCount(count + 1)
+    const values = [...inputFields]
+    values.push({ key: '', value: '' })
+    setInputFields(values)
   }
 
   const deleteForm = e => {
@@ -233,7 +237,24 @@ import axios from 'axios'
     }, [])
 
     const onSubmit = data => {
+      console.log(inputFields)
+
       console.log(data)
+      const d = {
+        name: data.name,
+        start_at: data.start_at,
+        description: data.description, 
+        run_time_expected: data.run_time, 
+        pre_stage_id: data.pre_stage_room.value, 
+        post_stage_id: data.post_stage_room.value, 
+        stage_id: data.stage_room.value,
+        custom_fields: [], 
+        // teleprompter_id: data.password_protected, 
+        add_members: [], 
+        add_presenters: []
+      }
+      console.log(d)
+
       // /project/agenda/<int:project_id></int:project_id>
       // {"name": "Agendaname", "start_at": "2021-11-01T12:12:12", "description": "Description**", "run_time_expected": 30, "pre_stage_id": 1, "post_stage_id": 2, "stage_id": 5, "custom_fields": [{'key': 'New Title', 'value': 'Val'}], 'teleprompter_id': 1, 'add_members': [{}], 'add_presenters': []}
         // if (Object.values(data).every(field => field.length > 0)) {
@@ -247,6 +268,18 @@ import axios from 'axios'
         //     }
         //   }
         // }
+    }
+
+    const handleInputChange = (index, event) => {
+      const values = [...inputFields]
+      console.log(event.target.name)
+      if (event.target.name === "name") {
+        values[index].key = event.target.value
+      } else {
+        values[index].value = event.target.value
+      }
+  
+      setInputFields(values)
     }
 
     return (
@@ -440,13 +473,13 @@ import axios from 'axios'
                             <Col md={5}>
                               <FormGroup>
                                 <Label for={`animation-item-name-${i}`}>Name</Label>
-                                <Input type='text' id={`animation-item-name-${i}`} placeholder='TNC' />
+                                <Input type='text' id={`animation-item-name-${i}`} name='name' placeholder='TNC' value={inputFields.key} onChange={event => handleInputChange(i, event)} />
                               </FormGroup>
                             </Col>
                             <Col md={5}>
                               <FormGroup>
                                 <Label for={`animation-cost-${i}`}>Value</Label>
-                                <Input type='text' id={`animation-cost-${i}`} placeholder='Manager' />
+                                <Input type='text' id={`animation-cost-${i}`} placeholder='Manager' value={inputFields.value} onChange={event => handleInputChange(i, event)} />
                               </FormGroup>
                             </Col>
                             

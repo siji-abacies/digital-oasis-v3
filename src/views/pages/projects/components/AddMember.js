@@ -37,12 +37,6 @@ const role = [
   { value: 3, label: 'Client'}  
 ]
 
-//  {}
-  // 1: { title: 'System Admin', color: 'light-success' },
-  // 2: { title: 'Crew', color: 'light-warning' },
-  // 3: { title: 'Client', color: 'light-primary' }
-// }
-
 const AddNewModal = ({ show, setShow, getProjectMembers, ToastContent }) => {
   const history = useHistory()
   const token = localStorage.getItem('token')
@@ -53,6 +47,7 @@ const AddNewModal = ({ show, setShow, getProjectMembers, ToastContent }) => {
 
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
+  const [invalid, setInvalid] = useState('')
 
   const showColorPicker = () => {
     const picker1 = colorPkr === 'colorPkrClose' ? 'colorPkrShow' : 'colorPkrClose'
@@ -109,8 +104,10 @@ const AddNewModal = ({ show, setShow, getProjectMembers, ToastContent }) => {
       
   const onSubmit = data => {
     console.log(data)
-    if (data.members !== undefined) {
-      console.log("teee")
+    if (data.members === undefined || data.members.length === 0) {
+      setInvalid('invalid')
+    } else {
+      setInvalid('')
       console.log(data.members)
       // {"remove_members": [user_id, user_id], "add_members": [{"id": user_id1, "user_role": 1}]}
       let add_member = []
@@ -189,37 +186,19 @@ const AddNewModal = ({ show, setShow, getProjectMembers, ToastContent }) => {
           <Row className='gy-1 pt-75'>
           <Col className='mb-1' md='12' sm='12'>
             <Label>Select User Role</Label>
-              {/* <Controller
-                as={Input}
-                type='select'
-                name='type'
-                id='type' 
-                control={control}
-                innerRef={register({ required: true })}
-                // onChange={onChangeRole}
+            
+              <Select
+                isClearable={false}
+                theme={selectThemeColors}
+                defaultValue={role[0]}
+                name='colors'
+                options={role}
+                className='react-select'
+                classNamePrefix='select' 
                 onChange={e => {
                   onChangeRole(e)
                 }} 
-                // invalid={data !== null && (data.status === undefined || data.status === null)}
-              >
-                <option value='1'>System Admin</option>
-                <option value='2'>Crew</option>
-                <option value='3'>Client</option>
-                    
-              </Controller> */}
-            <Select
-              isClearable={false}
-              theme={selectThemeColors}
-              // defaultValue={[userRoles[2], userRoles[3]]}
-              // isMulti
-              name='colors'
-              options={role}
-              className='react-select'
-              classNamePrefix='select' 
-              onChange={e => {
-                onChangeRole(e)
-              }} 
-            />
+              />
           </Col>
           <Col className='mb-1' md='12' sm='12'>
             <Label>Add Users</Label>
@@ -230,43 +209,32 @@ const AddNewModal = ({ show, setShow, getProjectMembers, ToastContent }) => {
                 control={control}
                 name='members'
                 options={members}
-                // className={invalid}
-                // className={classnames('react-select', { 'is-invalid': data !== null && data.privileges === null })}
+                className={invalid}
                 classNamePrefix='select'  isMulti 
                 theme={selectThemeColors}
               />
-            {/* <Select
-              isClearable={false}
-              theme={selectThemeColors}
-              // defaultValue={[users[2], users[3]]}
-              isMulti
-              name='colors'
-              // options={users}
-              className='react-select'
-              classNamePrefix='select'
-            /> */}
           </Col>
             
-            <Col xs={12} className='text-center mt-2 pt-50'>
-              <Button type='submit' className='me-1' color='primary' style={{marginRight: '20px'}}>
-                Submit
-              </Button>
-              <Button
-                type='reset'
-                color='secondary'
-                outline
-                onClick={() => {
-                  // handleReset()
-                  setShow(false)
-                }}
-              >
-                Cancel
-              </Button>
-            </Col>
-          </Row>
-        </Form>
-      </ModalBody>
-      </Modal>
+          <Col xs={12} className='text-center mt-2 pt-50'>
+            <Button type='submit' className='me-1' color='primary' style={{marginRight: '20px'}}>
+              Submit
+            </Button>
+            <Button
+              type='reset'
+              color='secondary'
+              outline
+              onClick={() => {
+                // handleReset()
+                setShow(false)
+              }}
+            >
+              Cancel
+            </Button>
+          </Col>
+        </Row>
+      </Form>
+    </ModalBody>
+  </Modal>
 
 )
 }
