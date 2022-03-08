@@ -258,7 +258,7 @@ const DataTableWithButtons = () => {
   const columns = [
   {
     name: 'Name',
-    selector: 'room_name',
+    selector: 'name',
     sortable: true,
     minWidth: '750px',
     cell: row => (
@@ -353,22 +353,27 @@ const DataTableWithButtons = () => {
     if (value.length) {
       updatedData = data.filter(item => {
         const startsWith =
-          item.full_name.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.post.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.email.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.age.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.salary.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.start_date.toLowerCase().startsWith(value.toLowerCase()) ||
-          status[item.status].title.toLowerCase().startsWith(value.toLowerCase())
+        item.name.toLowerCase().startsWith(value)
+        
+       
+          // item.name.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.post.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.email.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.age.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.salary.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.start_date.toLowerCase().startsWith(value.toLowerCase()) ||
+          // status[item.status].title.toLowerCase().startsWith(value.toLowerCase())
 
         const includes =
-          item.full_name.toLowerCase().includes(value.toLowerCase()) ||
-          item.post.toLowerCase().includes(value.toLowerCase()) ||
-          item.email.toLowerCase().includes(value.toLowerCase()) ||
-          item.age.toLowerCase().includes(value.toLowerCase()) ||
-          item.salary.toLowerCase().includes(value.toLowerCase()) ||
-          item.start_date.toLowerCase().includes(value.toLowerCase()) ||
-          status[item.status].title.toLowerCase().includes(value.toLowerCase())
+          item.name.toLowerCase().includes(value)
+        
+          // item.name.toLowerCase().includes(value.toLowerCase()) ||
+          // item.post.toLowerCase().includes(value.toLowerCase()) ||
+          // item.email.toLowerCase().includes(value.toLowerCase()) ||
+          // item.age.toLowerCase().includes(value.toLowerCase()) ||
+          // item.salary.toLowerCase().includes(value.toLowerCase()) ||
+          // item.start_date.toLowerCase().includes(value.toLowerCase()) ||
+          // status[item.status].title.toLowerCase().includes(value.toLowerCase())
 
         if (startsWith) {
           return startsWith
