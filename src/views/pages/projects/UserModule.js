@@ -47,6 +47,9 @@ import EditMember from './components/EditMember'
 import AddPrivilege from './components/AddPrivilege'
 import moment from 'moment'
 
+import withReactContent from 'sweetalert2-react-content'
+import Swal from 'sweetalert2'
+const MySwal = withReactContent(Swal)
 // ** Bootstrap Checkbox Component
 // const BootstrapCheckbox = forwardRef(({ onClick, ...rest }, ref) => (
 //   <div className='custom-control custom-checkbox'>
@@ -152,15 +155,15 @@ const DataTableWithButtons = () => {
   }
   
   const handleConfirmCancel = (item) => {
-    return MySwal.fire({
+    return MySwal.fire({ 
       title: 'Are you sure?',
       text: "You won't be able to revert this!",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
       customClass: {
-        confirmButton: 'btn btn-primary',
-        cancelButton: 'btn btn-danger ml-1'
+      confirmButton: 'btn btn-primary',
+      cancelButton: 'btn btn-danger ml-1'
       },
       buttonsStyling: false
     }).then(function (result) {
@@ -173,7 +176,7 @@ const DataTableWithButtons = () => {
           url: `https://w-call-demo02.herokuapp.com/project/members/${id}?members=${item.id}`,
           headers: { 
                       ContentType : 'application/json', 
-                      Authorization: `Token ${token}` 
+                      Authorization: `Token ${getToken()}` 
                     }
           
         })

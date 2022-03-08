@@ -61,6 +61,7 @@ import axios from 'axios'
 
 const MySwal = withReactContent(Swal)
 
+
 // ** Bootstrap Checkbox Component
 // const BootstrapCheckbox = forwardRef(({ onClick, ...rest }, ref) => (
 //   <div className='custom-control custom-checkbox'>
@@ -79,6 +80,26 @@ const status = {
   4: { title: 'Resigned', color: 'light-warning' },
   5: { title: 'Applied', color: 'light-info' }
 }
+
+const ToastContent = ({ message = null }) => (
+  
+  
+  <>
+  {message !== null && (
+  <Fragment>
+      <div className='toastify-header'>
+      <div className='title-wrapper'>
+          {/* <Avatar size='sm' color='warning' icon={<Coffee size={12} />} /> */}
+          <h6 className='toast-title fw-bold'>{message}</h6>
+      </div>
+      </div>
+      <div className='toastify-body'>
+      {/* <span>You have successfully logged in as an user to Vuexy. Now you can start to explore. Enjoy!</span> */}
+      </div>
+  </Fragment>
+  )}
+  </>
+)
 
 const DataTableWithButtons = () => {
   const dispatch = useDispatch()
@@ -677,8 +698,8 @@ const columns = [
           // selectableRowsComponent={BootstrapCheckbox}
         />
       </Card>
-      <AddPresenter show={show} setShow={setShow}/>
-      <EditPresenter show={editShow} setShow={setEditShow} presenterData={dataforEdit} />
+      <AddPresenter show={show} setShow={setShow} getPresenters={getPresenters} ToastContent={ToastContent}/>
+      <EditPresenter show={editShow} setShow={setEditShow} presenterData={dataforEdit} getPresenters={getPresenters} ToastContent={ToastContent}/>
      
       {/* <AddNewModal open={modal} handleModal={handleModal} /> */}
       </>
