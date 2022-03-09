@@ -107,15 +107,19 @@ import {
     })
     
     console.log(items)
+    setCount(items.length)
+    console.log(items.length)
     e.preventDefault()
     const slideDownWrapper = e.target.closest('.react-slidedown'),
       form = e.target.closest('form')
     if (slideDownWrapper) {
-      slideDownWrapper.remove()
+      console.log("Wrapper")
       setCustomFields(items)
+      // slideDownWrapper.remove()
 
     } else {
       form.remove()
+      
     }
   }
 
