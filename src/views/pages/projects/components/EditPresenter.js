@@ -80,22 +80,16 @@ import {
   const [checked_value, setChecked] = useState(false)
 
   useEffect(() => {
-    if (presenterData.is_password_protected === true) {
-      setChecked(true)
-    } else {
-      setChecked(false)
-    }
-  })
-
-  useEffect(() => {
     let len
-    if (presenterData && presenterData.custom_fields && presenterData.custom_fields.length > 0) {
+    if (presenterData && presenterData.custom_fields && presenterData.custom_fields.length > 0 && presenterData.is_password_protected === true) {
       console.log("edit")
       len = presenterData.custom_fields.length
       setCount(len)
+      setChecked(true)
       setCustomFields(presenterData.custom_fields)
     } else {
       len = 1
+      setChecked(false)
     }
    
   }, [presenterData])
