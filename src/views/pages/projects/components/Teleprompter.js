@@ -83,7 +83,11 @@ const AddNewModal = ({ show, setShow }) => {
     setShowItem('show-add-item')
     setSingleItem(row)
     console.log(row)
-    // console.log(moment(row.expiry_at).format('d/m/Y h:m:s'))
+    // const ex_date = moment(row.expiry_at).format('d/m/Y h:i K')
+    const ex_date = moment(row.expiry_at, "YY-MM-DD HH:mm:ss").format("DD/MM/yyyy hh:mm A")
+    console.log(ex_date)
+    // d/m/Y h:i K
+    console.log(moment(row.expiry_at).format('DD/MM/YY HH:mm:ss'))
         
     // console.log(row.expiry_at, moment(row.expiry_at, 'Y-MM-D HH:mm:ss').tz('Asia/Kolkata').format('Y-MM-D HH:mm:ss'))
         
@@ -398,17 +402,19 @@ const AddNewModal = ({ show, setShow }) => {
                     id='date-time-picker'
                     name='expiry_date' 
                     className='form-control' 
-                    defaultValue={singleItem !== [] ? singleItem.expiry_at : new Date()}
-                    // defaultValue={singleItem.expiry_at}
+                    // dateFormat='Y-m-d h:mm:ss'
+                    // defaultValue={singleItem !== [] ? singleItem.expiry_at : new Date()}
+                    // defaultValue={moment('2022-03-12 12:00:00', "YY-MM-DD HH:mm:ss").format("DD/MM/YYYY hh:mm A")}
+                    defaultValue={singleItem.expiry_at}
                     innerRef={register({ required: true })}
                     invalid={errors.expiry_date && true}
-                    options={{
-                      altFormat: "d/m/Y h:i K",
-                      // altFormat: 'd/m/Y h:m:s',
-                      // altFormat: 'Y-MM-D HH:mm:ss',
-                      altInput: true
-                      // dateFormat: "Y-m-d"
-                    }} 
+                    // options={{
+                    //   altFormat: "d/m/Y h:i K",
+                    //   // altFormat: 'd/m/Y h:m:s',
+                    //   // altFormat: 'Y-MM-D HH:mm:ss',
+                    //   altInput: true
+                    //   // dateFormat: "Y-m-d"
+                    // }} 
                   />
                 </FormGroup>
             </Col>

@@ -46,7 +46,7 @@ import Flatpickr from 'react-flatpickr'
 import Repeater from '@components/repeater'
 import { SlideDown } from 'react-slidedown'
 import AddAgenda from './components/AddAgenda'
-import EditAgendaModal from './modal/EditAgendaModal'
+// import EditAgendaModal from './modal/EditAgendaModal'
 import Teleprompter from './components/Teleprompter'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
@@ -489,7 +489,7 @@ const handlePerPage = e => {
   const getPresenters = () => {
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/presenter/get_all/${id}`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/filter_by_role/${id}?user_role=4`,
       headers: { 
         Authorization: `Token ${getToken()}`
       }
@@ -499,8 +499,52 @@ const handlePerPage = e => {
     .then(function (response) {
       console.log(response)
       if (response.data.status === 200) {
-        
-        setPresenters(response.data.data)
+        const data = response.data.data
+          const r = []
+          data.forEach(element => {
+            r.push({
+              value: element.id,
+              label: element.name
+            })
+          })
+        setPresenters(r)
+        // setAllowContent(true)
+        // setCreator(response.data.data.creator)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      } else if (response.data.status === 404) {
+        // setAllowContent(true)
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
+  const getUsers = () => {
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/filter_by_role/${id}`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        const data = response.data.data
+          const r = []
+          data.forEach(element => {
+            r.push({
+              value: element.id,
+              label: element.name
+            })
+          })
+        setPresenters(r)
         // setAllowContent(true)
         // setCreator(response.data.data.creator)
       } else if (response.data.status === 401) {
@@ -518,6 +562,7 @@ const handlePerPage = e => {
 
   const addItem = () => {
     getPresenters()
+    getUsers()
     setShow(true)
   }
 
@@ -593,8 +638,8 @@ const handlePerPage = e => {
           // selectableRowsComponent={BootstrapCheckbox}
         />
       </Card>
-      <AddAgenda show={show} setShow={setShow}/>
-      <EditAgendaModal show={editShow} setShow={setEditShow}></EditAgendaModal>
+      <AddAgenda show={show} setShow={setShow} />
+      {/* <EditAgendaModal show={editShow} setShow={setEditShow}></EditAgendaModal> */}
       <Teleprompter show={teleShow} setShow={setTeleShow}/>
       
     </Fragment>
