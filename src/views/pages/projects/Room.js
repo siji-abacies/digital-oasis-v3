@@ -88,8 +88,9 @@ const DataTableWithButtons = () => {
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
 
-  const [rowsPerPage, setRowsPerPage] = useState(7)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
   const [data, setData] = useState([])
+  const [total, setTotal] = useState(10)
   const [dataforEdit, setDataForEdit] = useState([])
 
   const onColorChange = (updatedColor) => {
@@ -101,10 +102,10 @@ const DataTableWithButtons = () => {
     setColorPkr(picker)
   }
 
-  const getRooms = () => {
+  const getRooms = (page, rowsPerPage) => {
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/paginated_list/${id}?page=1&per_page=10`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/paginated_list/${id}?page=${page}&per_page=${rowsPerPage}`,
       headers: { 
         Authorization: `Token ${getToken()}`
       }
@@ -116,6 +117,7 @@ const DataTableWithButtons = () => {
       if (response.data.status === 200) {
         
         setData(response.data.data)
+        setTotal(response.data.pagination.total)
         // setCreator(response.data.data.creator)
       } else if (response.data.status === 401) {
         history.push('/login')
@@ -131,7 +133,7 @@ const DataTableWithButtons = () => {
 
   // ** Get data on mount
   useEffect(() => {
-    getRooms()
+    getRooms(1, rowsPerPage)
     // dispatch(
     //   getData({
     //     page: currentPage,
@@ -151,6 +153,7 @@ const DataTableWithButtons = () => {
     //   })
     // )
     setRowsPerPage(parseInt(e.target.value))
+    getRooms(1, e.target.value)
   }
 
   const handleConfirmCancel = (row) => {
@@ -188,7 +191,7 @@ const DataTableWithButtons = () => {
                 confirmButton: 'btn btn-success'
               }
             })
-            getRooms()
+            getRooms(1, rowsPerPage)
           } else if (response.data.status > 200 && response.data.status > 299) {
             // this.showToast("warning", response.data.message)
           } else throw response.data
@@ -258,7 +261,7 @@ const DataTableWithButtons = () => {
   const columns = [
   {
     name: 'Name',
-    selector: 'room_name',
+    selector: 'name',
     sortable: true,
     minWidth: '750px',
     cell: row => (
@@ -353,22 +356,27 @@ const DataTableWithButtons = () => {
     if (value.length) {
       updatedData = data.filter(item => {
         const startsWith =
-          item.full_name.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.post.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.email.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.age.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.salary.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.start_date.toLowerCase().startsWith(value.toLowerCase()) ||
-          status[item.status].title.toLowerCase().startsWith(value.toLowerCase())
+        item.name.toLowerCase().startsWith(value)
+        
+       
+          // item.name.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.post.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.email.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.age.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.salary.toLowerCase().startsWith(value.toLowerCase()) ||
+          // item.start_date.toLowerCase().startsWith(value.toLowerCase()) ||
+          // status[item.status].title.toLowerCase().startsWith(value.toLowerCase())
 
         const includes =
-          item.full_name.toLowerCase().includes(value.toLowerCase()) ||
-          item.post.toLowerCase().includes(value.toLowerCase()) ||
-          item.email.toLowerCase().includes(value.toLowerCase()) ||
-          item.age.toLowerCase().includes(value.toLowerCase()) ||
-          item.salary.toLowerCase().includes(value.toLowerCase()) ||
-          item.start_date.toLowerCase().includes(value.toLowerCase()) ||
-          status[item.status].title.toLowerCase().includes(value.toLowerCase())
+          item.name.toLowerCase().includes(value)
+        
+          // item.name.toLowerCase().includes(value.toLowerCase()) ||
+          // item.post.toLowerCase().includes(value.toLowerCase()) ||
+          // item.email.toLowerCase().includes(value.toLowerCase()) ||
+          // item.age.toLowerCase().includes(value.toLowerCase()) ||
+          // item.salary.toLowerCase().includes(value.toLowerCase()) ||
+          // item.start_date.toLowerCase().includes(value.toLowerCase()) ||
+          // status[item.status].title.toLowerCase().includes(value.toLowerCase())
 
         if (startsWith) {
           return startsWith
@@ -384,6 +392,7 @@ const DataTableWithButtons = () => {
   // ** Function to handle Pagination
   const handlePagination = page => {
     setCurrentPage(page.selected)
+    getRooms(page.selected + 1, rowsPerPage)
   }
 
   // ** Custom Pagination
@@ -393,7 +402,7 @@ const DataTableWithButtons = () => {
       nextLabel=''
       forcePage={currentPage}
       onPageChange={page => handlePagination(page)}
-      pageCount={searchValue.length ? filteredData.length / 7 : data.length / 7 || 1}
+      pageCount={searchValue.length ? filteredData.length / rowsPerPage : total / rowsPerPage || 1}
       breakLabel='...'
       pageRangeDisplayed={2}
       marginPagesDisplayed={2}
@@ -518,7 +527,7 @@ const DataTableWithButtons = () => {
           pagination
           // selectableRows
           columns={columns}
-          paginationPerPage={7}
+          paginationPerPage={rowsPerPage}
           className='react-dataTable'
           sortIcon={<ChevronDown size={10} />}
           paginationDefaultPage={currentPage + 1}

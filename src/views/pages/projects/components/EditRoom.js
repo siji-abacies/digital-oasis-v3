@@ -51,13 +51,14 @@ import axios from 'axios'
     // const [show, setShow] = useState(false)
     const [picker, setPicker] = useState(new Date())
 
-  const [color, setColor] = useState(roomData.color)
+  const [color, setColor] = useState('')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [type, setType] = useState(false)
 
   useEffect(() => {
-     if (roomData && roomData.type_ === 1) {
+     if (roomData && roomData.type_ === 1 && roomData.color) {
       setType(true)
+      setColor(roomData.color)
      } else {
        setType(false)
      }
@@ -227,7 +228,8 @@ import axios from 'axios'
               <Col md={4} xs={12} className='mt-1 mb-1'>
                 <CustomInput inline name='type' type='checkbox' id='type' label='Stage Room'
                   innerRef={register({ required: false })} 
-                  invalid={errors.type && true} 
+                  invalid={errors.type && true}
+                  defaultChecked 
                   // defaultChecked={roomData.type_ === 1 ? true : false}
                   // defaultValue={presenterData.is_password_protected} 
                   // onChange={e => setIsoRecord(e.target.checked)} 
