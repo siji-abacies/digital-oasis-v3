@@ -70,6 +70,26 @@ const status = {
   5: { title: 'Applied', color: 'light-info' }
 }
 
+const ToastContent = ({ message = null }) => (
+  
+  
+  <>
+  {message !== null && (
+  <Fragment>
+      <div className='toastify-header'>
+      <div className='title-wrapper'>
+          {/* <Avatar size='sm' color='warning' icon={<Coffee size={12} />} /> */}
+          <h6 className='toast-title fw-bold'>{message}</h6>
+      </div>
+      </div>
+      <div className='toastify-body'>
+      {/* <span>You have successfully logged in as an user to Vuexy. Now you can start to explore. Enjoy!</span> */}
+      </div>
+  </Fragment>
+  )}
+  </>
+)
+
 const DataTableWithButtons = () => {
   const { id } = useParams()
 
@@ -103,9 +123,13 @@ const DataTableWithButtons = () => {
   }
 
   const getRooms = (page, rowsPerPage) => {
+    console.log(page)
+    console.log(rowsPerPage)
+    console.log(data.length)
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/paginated_list/${id}?page=${page}&per_page=${rowsPerPage}`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/paginated_list/${id}?page=1&per_page=10`,
+      // url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/paginated_list/${id}?page=${page}&per_page=${rowsPerPage}`,
       headers: { 
         Authorization: `Token ${getToken()}`
       }
@@ -537,8 +561,8 @@ const DataTableWithButtons = () => {
         />
       </Card>
       
-      <AddRoom show={show} setShow={setShow} roomList={getRooms} />
-      <EditRoom show={editShow} setShow={setEditShow} roomData={dataforEdit} roomList={getRooms}/>
+      <AddRoom show={show} setShow={setShow} roomList={getRooms} ToastContent={ToastContent} />
+      <EditRoom show={editShow} setShow={setEditShow} roomData={dataforEdit} roomList={getRooms} ToastContent={ToastContent}/>
     </Fragment>
   )
 }

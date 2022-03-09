@@ -38,7 +38,8 @@ import {
   import '@uppy/status-bar/dist/style.css'
 import { useHistory, useParams } from 'react-router-dom'
 import axios from 'axios'
-  const AddNewModal = ({ show, setShow, roomData, roomList }) => {
+  const AddNewModal = ({ show, setShow, roomData, roomList, ToastContent}) => {
+    console.log(ToastContent)
     const { id } = useParams()
     const history = useHistory()
 
@@ -54,6 +55,15 @@ import axios from 'axios'
   const [color, setColor] = useState('')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [type, setType] = useState(false)
+  const [checked_value, setChecked] = useState(false)
+
+  useEffect(() => {
+    if (roomData.is_active === true) {
+      setChecked(true)
+    } else {
+      setChecked(false)
+    }
+  })
 
   useEffect(() => {
      if (roomData && roomData.type_ === 1 && roomData.color) {
@@ -183,15 +193,15 @@ import axios from 'axios'
       if (response.data.status === 200) {
         roomList()
         setShow(false)
-        // toast.success(
-        // <ToastContent message='Project Successfully Added' />,
-        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-        // )
+        toast.success(
+        <ToastContent message='Room Successfully Added' />,
+          { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+        )
         } else if (response.data.status === 409) {
-          // toast.success(
-          // <ToastContent message={response.data.message} />,
-          //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-          // )
+          toast.success(
+          <ToastContent message={response.data.message} />,
+            { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+          )
         }
           // console.log(JSON.stringify(response.data))
       })
@@ -229,7 +239,7 @@ import axios from 'axios'
                 <CustomInput inline name='type' type='checkbox' id='type' label='Stage Room'
                   innerRef={register({ required: false })} 
                   invalid={errors.type && true}
-                  defaultChecked 
+                  defaultChecked={checked_value}
                   // defaultChecked={roomData.type_ === 1 ? true : false}
                   // defaultValue={presenterData.is_password_protected} 
                   // onChange={e => setIsoRecord(e.target.checked)} 

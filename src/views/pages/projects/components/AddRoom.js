@@ -38,7 +38,8 @@ import {
   import '@uppy/status-bar/dist/style.css'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
-  const AddNewModal = ({ show, setShow, roomList }) => {
+  const AddNewModal = ({ show, setShow, roomList, ToastContent }) => {
+    console.log(ToastContent)
     const { id } = useParams()
 
     const type = [
@@ -172,15 +173,15 @@ import axios from 'axios'
       if (response.data.status === 200) {
         roomList()
         setShow(false)
-        // toast.success(
-        // <ToastContent message='Project Successfully Added' />,
-        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-        // )
+        toast.success(
+        <ToastContent message='Room Successfully Added' />,
+          { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+        )
         } else if (response.data.status === 409) {
-          // toast.success(
-          // <ToastContent message={response.data.message} />,
-          //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-          // )
+          toast.success(
+          <ToastContent message={response.data.message} />,
+            { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+          )
         }
           // console.log(JSON.stringify(response.data))
       })
