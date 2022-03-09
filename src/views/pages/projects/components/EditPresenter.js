@@ -78,18 +78,37 @@ import {
   const [sendMail, setSendMail] = useState(presenterData.send_email)
   const [password_protected, setPasswordProtected] = useState(presenterData.is_password_protected)
   const [checked_value, setChecked] = useState(false)
+  const [isoRecord_checked, setIsoRecordChecked] = useState(false)
+  const [hdRecord_checked, setHdRecordChecked] = useState(false)
+  const [sendMail_checked, setSendMailChecked] = useState(false)
 
   useEffect(() => {
     let len
-    if (presenterData && presenterData.custom_fields && presenterData.custom_fields.length > 0 && presenterData.is_password_protected === true) {
+    if (presenterData && presenterData.custom_fields && presenterData.custom_fields.length > 0) {
       console.log("edit")
       len = presenterData.custom_fields.length
       setCount(len)
-      setChecked(true)
+      if (presenterData.is_password_protected === true) {
+        setChecked(true)
+      } else {
+        setChecked(false)
+      }
+      if (presenterData.iso_recording === true) {
+        setIsoRecordChecked(true)
+      } else {
+        setIsoRecordChecked(false)
+      }
+      if (presenterData.hd_local_recording === true) {
+        setHdRecordChecked(true)
+      } else {
+        setHdRecordChecked(false)
+      }
+      if (presenterData.send_email === true) {
+        setSendMailChecked(true)
+      }
       setCustomFields(presenterData.custom_fields)
     } else {
       len = 1
-      setChecked(false)
     }
    
   }, [presenterData])
@@ -371,7 +390,7 @@ import {
               <CustomInput inline name='iso_record' type='checkbox' id='iso_record' label='ISO Record'
                 innerRef={register({ required: false })} 
                 invalid={errors.iso_record && true} 
-                defaultChecked={isoRecord}  
+                defaultChecked={isoRecord_checked}  
                 onChange={e => setIsoRecord(e.target.checked)} 
                 // defaultChecked={presenterData.iso_recording}
               />
@@ -381,7 +400,7 @@ import {
               <CustomInput inline name='hd_record' type='checkbox' id='hd_record' label='High Quality Local Record'
                 innerRef={register({ required: false })} 
                 invalid={errors.hd_record && true} 
-                defaultChecked={hdRecord}  
+                defaultChecked={hdRecord_checked}  
                 onChange={e => sethdRecord(e.target.checked)} 
                 // defaultChecked={presenterData.hd_local_recording}
               />
@@ -390,7 +409,7 @@ import {
             <Col md={3} xs={12} className='mt-1'>
               <CustomInput inline type='checkbox' id='send_email' name='send_email' label='Send Email' 
               innerRef={register({ required: false })} 
-                defaultChecked={sendMail}  
+                defaultChecked={sendMail_checked}  
                 onChange={e => setSendMail(e.target.checked)}/>
 
             </Col>
