@@ -46,7 +46,7 @@ import {
   import { useParams } from 'react-router-dom'
   import axios from 'axios'
   import { toast, Slide } from 'react-toastify'
-  const AddNewModal = ({ show, setShow, getPresenters, ToastContent}) => {
+  const AddNewModal = ({ show, setShow, getPresenters, ToastContent, rowsPerPage}) => {
   const { id } = useParams()
 
     const type = [
@@ -212,7 +212,7 @@ import {
       .then(function (response) {
       console.log(response)
       if (response.data.status === 200) {
-        getPresenters()
+        getPresenters(1, rowsPerPage)
         // getProjectMembers()
         setShow(false)
         console.log(ToastContent)

@@ -38,7 +38,7 @@ import {
   import '@uppy/status-bar/dist/style.css'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
-  const AddNewModal = ({ show, setShow, roomList, ToastContent }) => {
+  const AddNewModal = ({ show, setShow, roomList, ToastContent, rowsPerPage}) => {
     console.log(ToastContent)
     const { id } = useParams()
 

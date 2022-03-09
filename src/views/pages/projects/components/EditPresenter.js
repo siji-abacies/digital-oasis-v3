@@ -48,7 +48,7 @@ import {
   import { useDispatch } from 'react-redux'
   import { toast, Slide } from 'react-toastify'
 
-  const AddNewModal = ({ show, setShow, presenterData, getPresenters, ToastContent }) => {
+  const AddNewModal = ({ show, setShow, presenterData, getPresenters, ToastContent, rowsPerPage}) => {
     
   const dispatch = useDispatch()
 
@@ -261,7 +261,7 @@ import {
       .then(function (response) {
       console.log(response)
       if (response.data.status === 200) {
-        getPresenters()
+        getPresenters(1, rowsPerPage)
         // getProjectMembers()
         setShow(false)
         toast.success(

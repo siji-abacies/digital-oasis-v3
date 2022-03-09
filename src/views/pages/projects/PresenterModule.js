@@ -713,8 +713,8 @@ const columns = [
           // selectableRowsComponent={BootstrapCheckbox}
         />
       </Card>
-      <AddPresenter show={show} setShow={setShow} getPresenters={getPresenters} ToastContent={ToastContent}/>
-      <EditPresenter show={editShow} setShow={setEditShow} presenterData={dataforEdit} getPresenters={getPresenters} ToastContent={ToastContent}/>
+      <AddPresenter show={show} setShow={setShow} getPresenters={getPresenters} ToastContent={ToastContent} rowsPerPage={rowsPerPage}/>
+      <EditPresenter show={editShow} setShow={setEditShow} presenterData={dataforEdit} getPresenters={getPresenters} ToastContent={ToastContent} rowsPerPage={rowsPerPage}/>
      
       {/* <AddNewModal open={modal} handleModal={handleModal} /> */}
       </>

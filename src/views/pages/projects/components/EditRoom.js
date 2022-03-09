@@ -38,7 +38,7 @@ import {
   import '@uppy/status-bar/dist/style.css'
 import { useHistory, useParams } from 'react-router-dom'
 import axios from 'axios'
-  const AddNewModal = ({ show, setShow, roomData, roomList, ToastContent}) => {
+  const AddNewModal = ({ show, setShow, roomData, roomList, ToastContent, rowsPerPage}) => {
     console.log(ToastContent)
     const { id } = useParams()
     const history = useHistory()
@@ -58,19 +58,13 @@ import axios from 'axios'
   const [checked_value, setChecked] = useState(false)
 
   useEffect(() => {
-    if (roomData.is_active === true) {
-      setChecked(true)
-    } else {
-      setChecked(false)
-    }
-  })
-
-  useEffect(() => {
      if (roomData && roomData.type_ === 1 && roomData.color) {
       setType(true)
       setColor(roomData.color)
+      setChecked(true)
      } else {
        setType(false)
+       setChecked(false)
      }
   }, [roomData])
 
@@ -230,7 +224,7 @@ import axios from 'axios'
                   id='room_name'
                   name='room_name'
                   innerRef={register({ required: true })}
-                  invalid={errors.room_name && true}
+                  invalid={errors.name && true}
                   placeholder='Green Room' 
                   defaultValue={roomData.name}
                 />
