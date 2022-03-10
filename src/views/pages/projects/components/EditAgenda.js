@@ -42,20 +42,13 @@ import {
 
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
-import moment from 'moment'
-  const AddNewModal = ({ show, setShow, presenters, users }) => {
+  const AddNewModal = ({ show, setShow, presenters, users, ItemData }) => {
     const { id } = useParams()
   const [basic, setBasic] = useState(new Date())
   const [rooms, setRooms] = useState([])
   const [inputFields, setInputFields] = useState([{ key: '', value: '' }])
   const [teleprompter, setTeleprompter] = useState([])
-  const stage = [
-    { value: '1', label: 'Room 1' },
-    { value: '2', label: 'Room 2' },
-    { value: '3', label: 'Room 3' },
-    { value: '4', label: 'Room 4' },
-    { value: '5', label: 'Room 5' }
-  ]
+  
   const userRoles = [
     { value: '1', label: 'System Admin', color: '#00B8D9', isFixed: true },
     { value: '2', label: 'Client', color: '#0052CC', isFixed: true },
@@ -74,6 +67,43 @@ import moment from 'moment'
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [count, setCount] = useState(1)
+
+  let post_stage = []
+  let pre_stage = []
+  let stage = []
+  let teleprompter_default = []
+  if (ItemData.length !== 0) {
+    post_stage = ItemData.post_stage
+    pre_stage = ItemData.pre_stage
+    stage = ItemData.stage
+    teleprompter_default = ItemData.teleprompter
+    // console.log(a)
+    post_stage = post_stage.map(({id, name}) => {
+      return {
+        value: id,
+        label: name
+      }
+    })
+    pre_stage = pre_stage.map(({id, name}) => {
+      return {
+        value: id,
+        label: name
+      }
+    })
+    stage = stage.map(({id, name}) => {
+      return {
+        value: id,
+        label: name
+      }
+    })
+    teleprompter_default = teleprompter_default.map(({id, name}) => {
+      return {
+        value: id,
+        label: name
+      }
+    })
+    // console.log(teleprompter_default)
+  }
 
   const increaseCount = () => {
     setCount(count + 1)
@@ -191,19 +221,13 @@ import moment from 'moment'
 
     useEffect(() => {
       // console.log(memberData.user_role)
+      
       listRooms()
       listTeleprompter()
-    }, [])
+    }, [ItemData])
 
     const onSubmit = data => {
       console.log(inputFields)
-      console.log(data.run_time)
-      const r = new Date(data.run_time)
-      const time = moment(r).format('HH:mm')
-      console.log(moment(r).format('HH'), moment(r).format('mm'))
-      const r_time = parseInt(moment(r).format('HH') * 60) + parseInt(moment(r).format('mm'))
-      console.log(time, r_time)
-      // console.log(JSON.stringify(data.run_time))
 
       let formated_time = JSON.stringify(data.start_at)
       console.log(formated_time)
@@ -250,7 +274,7 @@ import moment from 'moment'
         name: data.item_name,
         start_at: formated_time,
         description: data.item_description, 
-        run_time_expected: r_time, 
+        run_time_expected: 30, 
         // run_time_expected: data.run_time, 
         pre_stage_id: data.pre_stage_room.value, 
         post_stage_id: data.post_stage_room.value, 
@@ -330,7 +354,7 @@ import moment from 'moment'
                   type='text'
                   id='item_name'
                   name='item_name'
-                  // defaultValue={selectedUser.email}
+                  defaultValue={ItemData.name}
                   placeholder='Pre Show 1' 
                   innerRef={register({ required: true })}
                   invalid={errors.item_name && true}
@@ -348,7 +372,7 @@ import moment from 'moment'
                   name='item_description'
                   innerRef={register({ required: false })}
                   invalid={errors.item_description && true}
-                  // defaultValue={selectedUser.email}
+                  defaultValue={ItemData.description}
                   placeholder='Description'
                 />
                 </FormGroup>
@@ -417,6 +441,7 @@ import moment from 'moment'
                   options={rooms} 
                   classNamePrefix='select'  
                   theme={selectThemeColors} 
+                  defaultValue={pre_stage}
                 />
               </FormGroup>
             </Col>
@@ -432,6 +457,7 @@ import moment from 'moment'
                   options={rooms} 
                   classNamePrefix='select'  
                   theme={selectThemeColors} 
+                  defaultValue={stage}
                 />
               </FormGroup>
             </Col>
@@ -447,6 +473,7 @@ import moment from 'moment'
                   options={rooms} 
                   classNamePrefix='select'  
                   theme={selectThemeColors} 
+                  defaultValue={post_stage}
                 />
               </FormGroup>
             </Col>
@@ -518,7 +545,7 @@ import moment from 'moment'
                   options={teleprompter}
                   // className={invalid}
                   classNamePrefix='select'  
-                   
+                  defaultValue={teleprompter_default}
                   theme={selectThemeColors}
                 />
                 {/* <Select

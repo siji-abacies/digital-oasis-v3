@@ -298,8 +298,8 @@ const AddNewModal = ({ show, setShow }) => {
     }
     console.log(d)
 
-    const url = singleItem !== [] ? `project/teleprompter/${singleItem.id}/${id}` : `project/teleprompter/${id}`
-    const _method = singleItem !== [] ? 'put' : 'post'
+    const url = singleItem.length !== 0 ? `project/teleprompter/${singleItem.id}/${id}` : `project/teleprompter/${id}`
+    const _method = singleItem.length !== 0 ? 'put' : 'post'
     const config = {
       method: _method,
       url: `https://digital-oasis-dev.herokuapp.com/v3/${url}`,
@@ -408,13 +408,13 @@ const AddNewModal = ({ show, setShow }) => {
                     defaultValue={singleItem.expiry_at}
                     innerRef={register({ required: true })}
                     invalid={errors.expiry_date && true}
-                    // options={{
-                    //   altFormat: "d/m/Y h:i K",
-                    //   // altFormat: 'd/m/Y h:m:s',
-                    //   // altFormat: 'Y-MM-D HH:mm:ss',
-                    //   altInput: true
-                    //   // dateFormat: "Y-m-d"
-                    // }} 
+                    options={{
+                      // altFormat: "d/m/Y h:i K",
+                      // altFormat: 'd/m/Y h:m:s',
+                      // altFormat: 'Y-MM-D HH:mm:ss',
+                      altInput: true
+                      // dateFormat: "Y-m-d"
+                    }} 
                   />
                 </FormGroup>
             </Col>

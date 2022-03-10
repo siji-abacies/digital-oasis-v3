@@ -2,18 +2,11 @@
 import { Fragment, useState, forwardRef, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-// ** Table Data & Columns
-// import { data, columns } from '../data'
-
-// ** Add New Modal Component
-// import AddNewModal from './AddNewModal'
-
 // ** Third Party Components
 import ReactPaginate from 'react-paginate'
 import DataTable from 'react-data-table-component'
-import { ChevronDown, Share, Printer, FileText, File, Grid, Copy, Plus, MoreVertical, Send, PlayCircle, Edit, Archive, Trash, XCircle, Folder } from 'react-feather'
+import { ChevronDown, Plus, MoreVertical, Send, PlayCircle, Edit, Archive, Trash, XCircle, Folder } from 'react-feather'
 import { useForm, Controller } from 'react-hook-form'
-import Select, { components } from 'react-select'
 import { selectThemeColors, getToken } from '@utils'
 
 import {
@@ -22,31 +15,17 @@ import {
   CardTitle,
   Button, 
   UncontrolledDropdown, 
-  UncontrolledButtonDropdown,
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
   Input,
   Label,
   Row,
-  Col, 
-  Badge,
-  Modal, 
-  ModalBody, 
-  ModalHeader, 
-  ModalFooter,
-  Form, 
-  FormGroup, 
-  CustomInput
+  Col
 } from 'reactstrap'
 
-import Avatar from '@components/avatar'
-import Flatpickr from 'react-flatpickr'
-
-import Repeater from '@components/repeater'
-import { SlideDown } from 'react-slidedown'
 import AddAgenda from './components/AddAgenda'
-// import EditAgendaModal from './modal/EditAgendaModal'
+import EditAgenda from './components/EditAgenda'
 import Teleprompter from './components/Teleprompter'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
@@ -177,7 +156,9 @@ const DataTableWithButtons = () => {
   const [count, setCount] = useState(1)
   const [data, setData] = useState([])
   const [presenters, setPresenters] = useState([])
-
+  const [users, setUsers] = useState([])
+  const [allowContent, setAllowContent] = useState(false)
+  const [dataForEdit, setDataForEdit] = useState([])
   const listAgenda = () => {
     const config = {
       method: 'get',
@@ -193,9 +174,239 @@ const DataTableWithButtons = () => {
       if (response.data.status === 200) {
         
         setData(response.data.data)
+        setAllowContent(true)
         // setCreator(response.data.data.creator)
       } else if (response.data.status === 401) {
         history.push('/login')
+      } else if (response.data.status === 404) {
+        setAllowContent(true)
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+  
+  const getPresenters = () => {
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/filter_by_role/${id}?user_role=4`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        const data = response.data.data
+          const r = []
+          data.forEach(element => {
+            r.push({
+              value: element.id,
+              label: element.name
+            })
+          })
+        setPresenters(r)
+        // setAllowContent(true)
+        // setCreator(response.data.data.creator)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      } else if (response.data.status === 404) {
+        // setAllowContent(true)
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
+  const getUsers = () => {
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/filter_by_role/${id}`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        const data = response.data.data
+          const r = []
+          data.forEach(element => {
+            r.push({
+              value: element.id,
+              label: element.name
+            })
+          })
+        setUsers(r)
+        // setAllowContent(true)
+        // setCreator(response.data.data.creator)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      } else if (response.data.status === 404) {
+        // setAllowContent(true)
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
+  const getDataForEdit = (data) => {
+    console.log(data)
+    setDataForEdit(data)
+    // setEditShow(true)
+    // const config = {
+    //   method: 'get',
+    //   url: `https://digital-oasis-dev.herokuapp.com/v3/project/agenda/get_for_edit/${id}/${data.id}?time_zone=Asia/Kolkata`,
+    //   headers: { 
+    //     Authorization: `Token ${getToken()}`
+    //   }
+    // }
+    
+    // axios(config)
+    // .then(function (response) {
+    //   console.log(response)
+    //   if (response.data.status === 200) {
+        
+    //     setDataForEdit(response.data.data)
+    //     // setEditShow(true)
+    //   } else if (response.data.status === 401) {
+    //     history.push('/login')
+    //   }
+    //   // console.log(JSON.stringify(response.data))
+    // })
+    // .catch(function (error) {
+    //   console.log(error)
+    //   // history.push('/login')
+    // })
+  }
+
+  const editItem = (data) => {
+    getDataForEdit(data)
+    getPresenters()
+    getUsers()
+    setEditShow(true)
+  }
+
+  const handleConfirmCancel = (row) => {
+    return MySwal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      customClass: {
+        confirmButton: 'btn btn-primary',
+        cancelButton: 'btn btn-danger ml-1'
+      },
+      buttonsStyling: false
+    }).then(function (result) {
+      if (result.value) {
+  
+        // const token = "eyJhbGciOiJIUzUxMiIsImlhdCI6MTY0NDM4MDg0MywiZXhwIjoxNjQ0OTg1NjQzfQ.eyJpZCI6NywidXNlcl9yb2xlIjoxfQ.IyzNMBX9p9vXn5mas5emwjzMgF2i6sVi7R74_A6RSqrSHB38SduYb2ub73zNh8jqTMCjHp-c_kJmm15USqomMA"
+  
+        axios({ 
+          method: 'delete',
+          url: `https://digital-oasis-dev.herokuapp.com/project/agenda/${id}/${row.id}`,
+          headers: { 
+                      ContentType : 'application/json', 
+                      Authorization: `Token ${getToken()}` 
+                    }
+          
+        })
+        .then(response => {
+          console.log(response)
+          if (response.data.status === 200) {
+            MySwal.fire({
+              icon: 'success',
+              title: 'Deleted!',
+              text: 'Your file has been deleted.',
+              customClass: {
+                confirmButton: 'btn btn-success'
+              }
+            })
+            
+          } else if (response.data.status > 200 && response.data.status > 299) {
+            // this.showToast("warning", response.data.message)
+          } else throw response.data
+        })
+        .catch(error => {
+          console.log(error)
+          if (error && error.status === 401) {
+              // this.setState({areaLoading: false})  
+              // this.showToast("error", error.message)
+              // localStorage.removeItem('authProject');
+          }
+          if (error) {
+              // this.setState({areaLoading: false})  
+              // this.showToast("error", error.message)
+          } else {
+              // this.setState({areaLoading: false})  
+              // this.showToast("error", error.message)
+          }
+        })
+  
+        
+      } else if (result.dismiss === MySwal.DismissReason.cancel) {
+        MySwal.fire({
+          title: 'Cancelled',
+          text: 'User Delete Cancelled',
+          icon: 'error',
+          customClass: {
+            confirmButton: 'btn btn-success'
+          }
+        })
+      }
+    })
+  }
+
+  const agendaActions = (state, row) => {
+    let url = ''
+    if (state === 'running') {
+      // /project/agenda/state/<int:project_id>/<int:agenda_id>?started=running
+      url = `project/agenda/state/${id}/${row.id}?started=running`
+    } else {
+      url = `/project/agenda/state/${id}/${row.id}?started=terminated`
+    }
+    const config = {
+      method: 'post',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/${url}`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        // const data = response.data.data
+        //   const r = []
+        //   data.forEach(element => {
+        //     r.push({
+        //       value: element.id,
+        //       label: element.name
+        //     })
+        //   })
+        // setUsers(r)
+        // setAllowContent(true)
+        // setCreator(response.data.data.creator)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      } else if (response.data.status === 404) {
+        // setAllowContent(true)
       }
       // console.log(JSON.stringify(response.data))
     })
@@ -223,28 +434,28 @@ const DataTableWithButtons = () => {
     },
     {
       name: 'Start Time',
-      selector: 'start_time',
+      selector: 'start_at',
       sortable: true,
       // minWidth: '150px'
       width: '150px'
     },
     {
       name: 'Length',
-      selector: 'length',
+      selector: 'run_time_expected',
       sortable: true,
       // minWidth: '150px'
       width: '80px'
     },
     {
       name: 'Back Room',
-      selector: 'back_room',
+      selector: 'pre_stage[0].name',
       sortable: true,
       // minWidth: '150px'
       width: '150px'
     },
     {
       name: 'Stage',
-      selector: 'stage',
+      selector: 'stage[0].name',
       sortable: true,
       // minWidth: '150px'
       width: '150px'
@@ -265,7 +476,7 @@ const DataTableWithButtons = () => {
                   <Send size={15} />
                   <span className='align-middle ml-50'>Send Mail</span>
                 </DropdownItem>
-                <DropdownItem className='w-100' onClick={() => setEditShow(true)}>
+                <DropdownItem className='w-100' onClick={() => editItem(row)}>
                   <Edit size={15} />
                   <span className='align-middle ml-50'>Edit</span>
                 </DropdownItem>
@@ -274,7 +485,7 @@ const DataTableWithButtons = () => {
                   <span className='align-middle ml-50'>Delete</span>
                 </DropdownItem>
               </DropdownMenu>
-              <PlayCircle size={18} style={{marginRight: '3px'}}/>
+              <PlayCircle size={18} style={{marginRight: '3px'}} onClick={() => agendaActions('running', row)}/>
               <XCircle size={18} style={{marginRight: '3px'}}></XCircle>
               <Folder size={18} />
             </UncontrolledDropdown>
@@ -285,30 +496,29 @@ const DataTableWithButtons = () => {
     }
   ]
 
- // ** Get data on mount
- useEffect(() => {
-   listAgenda()
-  // dispatch(
-  //   getData({
-  //     page: currentPage,
-  //     perPage: rowsPerPage,
-  //     q: searchValue
-  //   })
-  // )
-}, [dispatch])
+  // ** Get data on mount
+  useEffect(() => {
+    listAgenda()
+    // dispatch(
+    //   getData({
+    //     page: currentPage,
+    //     perPage: rowsPerPage,
+    //     q: searchValue
+    //   })
+    // )
+  }, [dispatch])
 
-// ** Function to handle per page
-const handlePerPage = e => {
-  // dispatch(
-  //   getData({
-  //     page: currentPage,
-  //     perPage: parseInt(e.target.value),
-  //     q: searchValue
-  //   })
-  // )
-  setRowsPerPage(parseInt(e.target.value))
-}
-
+  // ** Function to handle per page
+  const handlePerPage = e => {
+    // dispatch(
+    //   getData({
+    //     page: currentPage,
+    //     perPage: parseInt(e.target.value),
+    //     q: searchValue
+    //   })
+    // )
+    setRowsPerPage(parseInt(e.target.value))
+  }
 
   const increaseCount = () => {
     setCount(count + 1)
@@ -480,85 +690,11 @@ const handlePerPage = e => {
     { value: '3', label: 'Crew', color: '#5243AA', isFixed: true }
   ]
 
-  const users = [
-    { value: '1', label: 'Stella Ganderton', color: '#00B8D9', isFixed: true },
-    { value: '2', label: 'Harmonia Nisius', color: '#0052CC', isFixed: true },
-    { value: '3', label: 'Genevra Honeywood', color: '#5243AA', isFixed: true }
-  ]
-
-  const getPresenters = () => {
-    const config = {
-      method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/filter_by_role/${id}?user_role=4`,
-      headers: { 
-        Authorization: `Token ${getToken()}`
-      }
-    }
-    
-    axios(config)
-    .then(function (response) {
-      console.log(response)
-      if (response.data.status === 200) {
-        const data = response.data.data
-          const r = []
-          data.forEach(element => {
-            r.push({
-              value: element.id,
-              label: element.name
-            })
-          })
-        setPresenters(r)
-        // setAllowContent(true)
-        // setCreator(response.data.data.creator)
-      } else if (response.data.status === 401) {
-        history.push('/login')
-      } else if (response.data.status === 404) {
-        // setAllowContent(true)
-      }
-      // console.log(JSON.stringify(response.data))
-    })
-    .catch(function (error) {
-      console.log(error)
-      // history.push('/login')
-    })
-  }
-
-  const getUsers = () => {
-    const config = {
-      method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/filter_by_role/${id}`,
-      headers: { 
-        Authorization: `Token ${getToken()}`
-      }
-    }
-    
-    axios(config)
-    .then(function (response) {
-      console.log(response)
-      if (response.data.status === 200) {
-        const data = response.data.data
-          const r = []
-          data.forEach(element => {
-            r.push({
-              value: element.id,
-              label: element.name
-            })
-          })
-        setPresenters(r)
-        // setAllowContent(true)
-        // setCreator(response.data.data.creator)
-      } else if (response.data.status === 401) {
-        history.push('/login')
-      } else if (response.data.status === 404) {
-        // setAllowContent(true)
-      }
-      // console.log(JSON.stringify(response.data))
-    })
-    .catch(function (error) {
-      console.log(error)
-      // history.push('/login')
-    })
-  }
+  // const users = [
+  //   { value: '1', label: 'Stella Ganderton', color: '#00B8D9', isFixed: true },
+  //   { value: '2', label: 'Harmonia Nisius', color: '#0052CC', isFixed: true },
+  //   { value: '3', label: 'Genevra Honeywood', color: '#5243AA', isFixed: true }
+  // ]
 
   const addItem = () => {
     getPresenters()
@@ -571,8 +707,11 @@ const handlePerPage = e => {
     setTeleShow(true)
   }
 
+  console.log(data)
   return (
     <Fragment>
+      {allowContent && (
+         <>
       <Card>
         <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
           <CardTitle tag='h4'>Schedules</CardTitle>
@@ -638,10 +777,11 @@ const handlePerPage = e => {
           // selectableRowsComponent={BootstrapCheckbox}
         />
       </Card>
-      <AddAgenda show={show} setShow={setShow} />
-      {/* <EditAgendaModal show={editShow} setShow={setEditShow}></EditAgendaModal> */}
+      <AddAgenda show={show} setShow={setShow} presenters={presenters} users={users} />
+      <EditAgenda show={editShow} setShow={setEditShow} presenters={presenters} users={users} ItemData={dataForEdit}/>
       <Teleprompter show={teleShow} setShow={setTeleShow}/>
-      
+      </>
+      )}
     </Fragment>
   )
 }

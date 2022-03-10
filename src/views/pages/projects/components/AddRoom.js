@@ -28,16 +28,17 @@ import {
   import { useForm, Controller } from 'react-hook-form'
   import Select, { components } from 'react-select'
   import Flatpickr from 'react-flatpickr'
-  import Uppy from '@uppy/core'
-  import { DragDrop } from '@uppy/react'
-  import thumbnailGenerator from '@uppy/thumbnail-generator'
   import { selectThemeColors, getToken } from '@utils'
    import ReactColorPicker from '@super-effective/react-color-picker'
   
-  import 'uppy/dist/uppy.css'
-  import '@uppy/status-bar/dist/style.css'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
+import Uppy from '@uppy/core'
+import { DragDrop } from '@uppy/react'
+import thumbnailGenerator from '@uppy/thumbnail-generator'
+import 'uppy/dist/uppy.css'
+import '@uppy/status-bar/dist/style.css'
+
   const AddNewModal = ({ show, setShow, roomList }) => {
     const { id } = useParams()
 
@@ -52,6 +53,7 @@ import axios from 'axios'
 
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
+  const [selectedFile, setSelectedFile] = useState()
 
   const onColorChange = (updatedColor) => {
     setColor(updatedColor)
@@ -70,7 +72,6 @@ import axios from 'axios'
   })
 
   // uppy.use(Uppy.Tus, { endpoint: 'https://tusd.tusdemo.net/files/' })
-  // /user/edit_user_details/<user_id>
   uppy.use(thumbnailGenerator)
 
   uppy.on('thumbnail:generated', (file, preview) => {
@@ -84,11 +85,7 @@ import axios from 'axios'
     const img = result.successful
     const d = img[0].data
     console.log(img[0].data)
-    // const encode_img = JSON.stringify(img[0].data)
-    // console.log(encode_img)
-
-    const token = "eyJhbGciOiJIUzUxMiIsImlhdCI6MTY0NDM4MDg0MywiZXhwIjoxNjQ0OTg1NjQzfQ.eyJpZCI6NywidXNlcl9yb2xlIjoxfQ.IyzNMBX9p9vXn5mas5emwjzMgF2i6sVi7R74_A6RSqrSHB38SduYb2ub73zNh8jqTMCjHp-c_kJmm15USqomMA"
-
+    // setSelectedFile(d)
     const formData = new FormData()
     formData.append('file', img[0].data)
 
@@ -96,37 +93,6 @@ import axios from 'axios'
       file: img[0].data
       // file: d
     }
-
-    // console.log(formData)
-    // console.log(body1)
-    // console.log(body1.file)
-    // const config = {
-    //   method: 'put',
-    //   url: `https://w-call-demo02.herokuapp.com/user/edit_user_details/7`,
-    //   headers: { 
-    //     // AccessControlAllowOrigin: '*',
-    //     // ContentType: 'application/json',
-    //     ContentType: 'multipart/form-data',
-    //     Authorization: `Token ${token}`
-    //   }
-    //   // data: body1.file
-    //   // file: body1
-    //   // body1
-      
-    // }
-
-    // axios(config, formData)
-    // .then(function (response) {
-    //   console.log(response)
-    //   // data = response.data
-    //   // setUserData(data)
-    //   // handleModal()
-    // })
-    // .catch(function (error) {
-    //   console.log(error)
-    // })
-
-
     console.log('successful files:', result.successful)
     console.log('failed files:', result.failed)
   })
@@ -147,13 +113,32 @@ import axios from 'axios'
         //   firstName: 'First name'
         // }
       })
+
+      uppy.on("file-added", function (file) {
+        const reader = new FileReader()
+        reader.readAsDataURL(file.data)
+        // setSelectedFile(base64data)
+        reader.onloadend = function () {
+          let base64data = reader.result
+          // data:image/png;base64, 
+          base64data = base64data.replace(/^data:image\/[a-z]+;base64,/, "")
+          console.log(base64data)
+          setSelectedFile(base64data)
+        }
+      })
+
       
     const onSubmit = data => {
       console.log(data)
+      // const encode_img = JSON.stringify(data.customFile)
+      // const encode_img = JSON.stringify(selectedFile)
+      // console.log(encode_img)
       const d = {
         name: data.room_name,
         type_: data.type ? 1 : 3,
-        color: data.color
+        color: data.color,
+        image_type: 'image/png',
+        file: selectedFile 
       }
       console.log(d)
       const config = {
@@ -170,7 +155,7 @@ import axios from 'axios'
       .then(function (response) {
       console.log(response)
       if (response.data.status === 200) {
-        roomList()
+        roomList(1, 10)
         setShow(false)
         // toast.success(
         // <ToastContent message='Project Successfully Added' />,
@@ -237,11 +222,15 @@ import axios from 'axios'
                 />
                 {/* <CustomInput inline type='checkbox' id='exampleCustomCheckbox' label='Stage Room' name='type' defaultChecked /> */}
               </Col>
-              <Col md={12} xs={12}>
+              {/* <Col md={12} xs={12}>
                 <FormGroup>
                 <Label for='exampleCustomFileBrowser'>Upload Logo</Label>
-                <CustomInput type='file' id='exampleCustomFileBrowser' name='customFile' />
+                <CustomInput type='file' id='exampleCustomFileBrowser' name='customFile' innerRef={register({ required: false })}/>
                 </FormGroup>
+              </Col> */}
+              <Col md={12} xs={12} className='mt-1'>
+                <Label>Upload Logo</Label>
+                <DragDrop uppy={uppy} />
               </Col>
               <Col md={12}>
               <FormGroup>
