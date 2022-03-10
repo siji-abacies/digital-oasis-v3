@@ -71,13 +71,13 @@ const role = {
   3: { title: 'Client', color: 'light-primary' }
 }
 
-const AddNewModal = ({ show, setShow, getProjectList, PERMISSIONS, memberPrevileges, ToastContent}) => {
+const AddNewModal = ({ show, setShow, getProjectList, PERMISSIONS, ToastContent}) => {
   const history = useHistory()
   const token = localStorage.getItem('token')
   const dispatch = useDispatch()
   const { id } = useParams()
-console.log(memberPrevileges)
-  // const [memberPrevileges, setMemberPrevileges] = useState([])
+// console.log(memberPrevileges)
+  const [memberPrevileges, setMemberPrevileges] = useState([])
 
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
@@ -95,14 +95,49 @@ console.log(memberPrevileges)
   //   getUserFilterByRole(updateRole.value)
   // }
 
-  // useEffect(() => {
-  //   getUserFilterByRole(1)
+  const getUserFilterByRole = () => {
+    // /project/members/privilege_groups/<int:project_id>
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/privilege_groups/${id}`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
     
-  // }, [dispatch])
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        // let mem_data = []
+        // const member_data = response.data.data
+        // mem_data = member_data.map(({id, name}) => {
+        //   return {
+        //     value: id,
+        //     label: name
+        //   }
+        // })
+
+        setMemberPrevileges(response.data.data)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
+  useEffect(() => {
+    getUserFilterByRole()
+    
+  }, [])
 
   const { register, errors, handleSubmit, control } = useForm()
       
-  const onChangePrivilege = (index, e) => {
+  const onChangePrivilege = (index, e, selected_permissions) => {
     const permission_values = []
     let d = []
     const grup = []
@@ -236,6 +271,7 @@ console.log(memberPrevileges)
 
   }
 
+  // console.log(memberPrevileges)
     return (
       <Modal isOpen={show} toggle={() => setShow(!show)} className='modal-dialog-centered modal-lg'>
       <ModalHeader className='bg-transparent' toggle={() => setShow(!show)}></ModalHeader>
@@ -247,15 +283,23 @@ console.log(memberPrevileges)
         <Form onSubmit={handleSubmit(onSubmit)}>
         {/* <Form onSubmit={onSubmit}> */}
         {/* <p className='fw-bolder pt-50 mt-2'>12 Members</p> */}
+        {memberPrevileges.length > 0 && (
           <ListGroup flush className='mb-2'>
+            
             {memberPrevileges.map((item, index) => {
 
               console.log(memberPrevileges)
+              const selected_p = []
               item.permission_groups.forEach(element => {
-                setPermissionGID(element.permission_group_id)
-                console.log(element.permission_group_id)
+                selected_p.push({
+                  value: element.permission_group_id,
+                  label: element.name
+                })
+              //   setPermissionGID(element.permission_group_id)
+              //   console.log(element.permission_group_id)
                 
               })
+              console.log(selected_p)
               return (
                 <ListGroupItem key={item.id} className='d-flex align-items-start border-0 px-0'>
                   
@@ -267,41 +311,10 @@ console.log(memberPrevileges)
                     </div>
                     <Col md='6'>
                       <input hidden value={item.id} name={`project_member_[${item.id}]`} ref={register} type="text" className={`form-control`} />
-                      {/* <input name={`project_member_[${item.id}]`} ref={register} type="text" className={`form-control ${errors.tickets?.[i]?.name ? 'is-invalid' : '' }`} /> */}
-                      {/* <Input
-                        id='project_member'
-                        name={`project_member_${item.id }`}
-                        // innerRef={register(`test.${index}.project_member${item.id }`)}
-                        value={item.id} 
-                        // control={control} 
-                        hidden
-                      /> */}
-{/*                       
-                      <Controller
-                        isClearable 
-                        as={Select}
-                        id={`react-select_${item.id}`}
-                        // control={control}
-                        // name='groups'
-                        name={`groups_${item.id }`}
-                        options={PERMISSIONS}
-                        // innerRef={register(`test.${index}.groups_${item.id }`)}
-                        // className={invalid}
-                        // className={classnames('react-select', { 'is-invalid': data !== null && data.privileges === null })}
-                        classNamePrefix='select'  isMulti 
-                        theme={selectThemeColors}
-                      /> */}
-
-                    {/* <Controller isClearable 
-                        as={Select} 
-                        isMulti 
-                        control={control} 
-                        options={PERMISSIONS}
-                        name={`privileges[${item.id}]`} ref={register} className={`form-control`} /> */}
-                    <Select
+                      <Select
                       isClearable={false}
                       theme={selectThemeColors}
-                      // defaultValue={[PERMISSIONS[1], PERMISSIONS[2]]}
+                      defaultValue={selected_p}
                       isMulti
                       name='privileges'
                       id={`react-select_${item.id}`}
@@ -309,7 +322,7 @@ console.log(memberPrevileges)
                       className='react-select mb-1'
                       classNamePrefix='select' 
                       onChange={event => {
-                        onChangePrivilege(item.id, event)
+                        onChangePrivilege(item.id, event, selected_p)
                       }}
                     />
                     </Col>
@@ -319,6 +332,7 @@ console.log(memberPrevileges)
               ) 
              })}
           </ListGroup>
+        )}
           {/* <Row className='gy-1 pt-75'>
             <Col className='mb-1' md='6' sm='12'>
               <Label><h4>Users</h4></Label>

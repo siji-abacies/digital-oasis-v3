@@ -451,43 +451,43 @@ const DataTableWithButtons = () => {
     { value: '3', label: 'Crew', color: '#5243AA', isFixed: true }
   ]
 
-  const getUserFilterByRole = () => {
-    // /project/members/privilege_groups/<int:project_id>
-    const config = {
-      method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/privilege_groups/${id}`,
-      headers: { 
-        Authorization: `Token ${getToken()}`
-      }
-    }
+  // const getUserFilterByRole = () => {
+  //   // /project/members/privilege_groups/<int:project_id>
+  //   const config = {
+  //     method: 'get',
+  //     url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/privilege_groups/${id}`,
+  //     headers: { 
+  //       Authorization: `Token ${getToken()}`
+  //     }
+  //   }
     
-    axios(config)
-    .then(function (response) {
-      console.log(response)
-      if (response.data.status === 200) {
-        // let mem_data = []
-        // const member_data = response.data.data
-        // mem_data = member_data.map(({id, name}) => {
-        //   return {
-        //     value: id,
-        //     label: name
-        //   }
-        // })
+  //   axios(config)
+  //   .then(function (response) {
+  //     console.log(response)
+  //     if (response.data.status === 200) {
+  //       // let mem_data = []
+  //       // const member_data = response.data.data
+  //       // mem_data = member_data.map(({id, name}) => {
+  //       //   return {
+  //       //     value: id,
+  //       //     label: name
+  //       //   }
+  //       // })
 
-        setMemberPrevileges(response.data.data)
-      } else if (response.data.status === 401) {
-        history.push('/login')
-      }
-      // console.log(JSON.stringify(response.data))
-    })
-    .catch(function (error) {
-      console.log(error)
-      // history.push('/login')
-    })
-  }
+  //       setMemberPrevileges(response.data.data)
+  //     } else if (response.data.status === 401) {
+  //       history.push('/login')
+  //     }
+  //     // console.log(JSON.stringify(response.data))
+  //   })
+  //   .catch(function (error) {
+  //     console.log(error)
+  //     // history.push('/login')
+  //   })
+  // }
 
   const addPrivilege_list = () => {
-    getUserFilterByRole()
+    // getUserFilterByRole()
     setShowPrivilege(true)
     const config = {
         method: 'get',
@@ -595,7 +595,8 @@ const DataTableWithButtons = () => {
       </Card>
       <AddMember show={show} setShow={setShow} getProjectMembers={getProjectMembers} />
       <EditMember show={editShow} setShow={setEditShow} getProjectMembers={getProjectMembers} memberData={dataforEdit} role={role}/>
-      <AddPrivilege show={setPrivilege} setShow={setShowPrivilege} getProjectMembers={getProjectMembers} PERMISSIONS={dataprivilege} memberPrevileges={memberPrevileges} />
+      {/* <AddPrivilege show={setPrivilege} setShow={setShowPrivilege} getProjectMembers={getProjectMembers} PERMISSIONS={dataprivilege} memberPrevileges={memberPrevileges} /> */}
+      <AddPrivilege show={setPrivilege} setShow={setShowPrivilege} getProjectMembers={getProjectMembers} PERMISSIONS={dataprivilege} />
       
       {/* <AddNewModal open={modal} handleModal={handleModal} /> */}
     </Fragment>
