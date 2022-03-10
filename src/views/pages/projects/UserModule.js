@@ -252,7 +252,8 @@ const DataTableWithButtons = () => {
       cell: row => {
         return (
           <div className='d-flex'>
-            <UncontrolledDropdown>
+            <p className='w-100' onClick={() => handleConfirmCancel(row)}><Trash size={15} /></p>
+            {/* <UncontrolledDropdown>
               <DropdownToggle className='pr-1' tag='span'>
                 <MoreVertical size={15} />
               </DropdownToggle>
@@ -262,11 +263,11 @@ const DataTableWithButtons = () => {
                   <span className='align-middle ml-50'>Edit</span>
                 </DropdownItem>
                 <DropdownItem className='w-100' onClick={() => handleConfirmCancel(row)}>
-                  <Trash size={15} />
                   <span className='align-middle ml-50'>Delete</span>
+                  <Trash size={15} />
                 </DropdownItem>
               </DropdownMenu>
-            </UncontrolledDropdown>
+            </UncontrolledDropdown> */}
           </div>
         )
       }
