@@ -445,7 +445,7 @@ import {
                 Password
               </Label>
               <Input
-                  type='text'
+                  type={password_protected === false ? "text" : "password"}
                   id='password'
                   name='password'
                   placeholder='' 

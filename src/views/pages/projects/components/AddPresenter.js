@@ -64,7 +64,7 @@ import {
   const [isoRecord, setIsoRecord] = useState(true)
   const [hdRecord, sethdRecord] = useState(false)
   const [sendMail, setSendMail] = useState(true)
- 
+  const [password_protected_state, setPasswordProtected] = useState('')    
 
   const [inputFields, setInputFields] = useState([{ key: '', value: '' }])
 
@@ -366,7 +366,7 @@ import {
                 innerRef={register({ required: false })} 
                 invalid={errors.password_protected && true} 
                 defaultChecked 
-                // onChange={e => setIsoRecord(e.target.checked)} 
+                onChange={e => setPasswordProtected(e.target.checked)} 
               />
 
             </Col>
@@ -375,7 +375,8 @@ import {
                 Password
               </Label>
               <Input
-                  type='text'
+                  type={password_protected_state === false ? "text" : "password"}
+                  // type='text'
                   id='password'
                   name='password'
                   placeholder='' 
