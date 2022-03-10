@@ -28,7 +28,7 @@ import 'uppy/dist/uppy.css'
 import '@uppy/status-bar/dist/style.css'
 import moment from 'moment'
 import axios from 'axios'
-import { toast } from 'react-toastify'
+import { toast, Slide } from 'react-toastify'
 const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent }) => {
   const token = localStorage.getItem('token')
 
