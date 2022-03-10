@@ -31,7 +31,7 @@ import {
   import Uppy from '@uppy/core'
   import { DragDrop } from '@uppy/react'
   import thumbnailGenerator from '@uppy/thumbnail-generator'
-  import { selectThemeColors, getToken } from '@utils'
+  import { selectThemeColors, getToken } from '@utils' 
    import ReactColorPicker from '@super-effective/react-color-picker'
   
   import 'uppy/dist/uppy.css'

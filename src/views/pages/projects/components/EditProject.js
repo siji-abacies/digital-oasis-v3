@@ -28,13 +28,13 @@ import 'uppy/dist/uppy.css'
 import '@uppy/status-bar/dist/style.css'
 import moment from 'moment'
 import axios from 'axios'
-import { toast } from 'react-toastify'
+import { toast, Slide } from 'react-toastify'
 const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent }) => {
   const token = localStorage.getItem('token')
 
   const [picker, setPicker] = useState(new Date())
 
-  const [color, setColor] = useState('')
+  const [prj_color, setColor] = useState('')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
 
   const onColorChange = (updatedColor) => {
@@ -46,8 +46,10 @@ const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent 
     setColorPkr(picker)
   }
 
+
   useEffect(() => {
     if (projectData) {
+      console.log(projectData)
      setColor(projectData.color)
     }
   }, [projectData])
@@ -102,11 +104,12 @@ const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent 
         name: data.project_name,
         description: data.description,
         job_number: data.project_number, 
-        color: data.color, 
+        color: prj_color, 
         type_: parseInt(data.type), 
         build_at: moment(data.build_date[0]).format("Y-MM-D")
       }
       console.log(d)
+      console.log(data.color)
       
       const config = {
         method: 'put',
@@ -142,8 +145,6 @@ const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent 
       })
 
     }
-
-    console.log(projectData.color)
     return (
     <Modal isOpen={show} toggle={() => setShow(!show)} className='modal-dialog-centered modal-lg'>
         <ModalHeader className='bg-transparent' toggle={() => setShow(!show)}></ModalHeader>
@@ -251,16 +252,16 @@ const EditProject = ({ show, setShow, projectData, getProjectList, ToastContent 
                     id='color'
                     name='color'
                     // defaultValue={projectData.color}
-                    defaultValue={color}
+                    defaultValue={prj_color}
                     // placeholder='Green Room'
                     onClick={showColorPicker}
                     toggle={showColorPicker} 
                     innerRef={register({ required: false })}
-                      invalid={errors.color && true}
+                      // invalid={errors.color && true}
                   />
                   
                   <div className={colorPkr} style={{ width: '400px', height: '400px', padding: '15px 5px', border: '1px solid #ccc', borderRadius: '10px'}}>
-                    <ReactColorPicker color={color} onChange={onColorChange} />
+                    <ReactColorPicker color={prj_color} onChange={onColorChange} />
                   </div>
                 </div>
                 
