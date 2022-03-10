@@ -37,6 +37,7 @@ import {
   import 'uppy/dist/uppy.css'
   import '@uppy/status-bar/dist/style.css'
 import { useHistory, useParams } from 'react-router-dom'
+import { toast, Slide } from 'react-toastify'
 import axios from 'axios'
   const AddNewModal = ({ show, setShow, roomData, roomList, ToastContent, rowsPerPage}) => {
     console.log(ToastContent)
