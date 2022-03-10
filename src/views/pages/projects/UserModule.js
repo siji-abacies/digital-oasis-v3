@@ -86,11 +86,12 @@ const DataTableWithButtons = () => {
   const [total, setTotal] = useState(10)
   const [filteredData, setFilteredData] = useState([])
   const [rowsPerPage, setRowsPerPage] = useState(10)
-
+  const [memberPrevileges, setMemberPrevileges] = useState([])
   const [show, setShow] = useState(false)
   const [editShow, setEditShow] = useState(false)
   const [setPrivilege, setShowPrivilege] = useState(false)
   const [dataforEdit, setDataForEdit] = useState([])
+  const [dataprivilege, setPrivilegeData] = useState([])
   // ** Function to handle Modal toggle
   const handleModal = () => setModal(!modal)
 
@@ -252,7 +253,8 @@ const DataTableWithButtons = () => {
       cell: row => {
         return (
           <div className='d-flex'>
-            <UncontrolledDropdown>
+            <p className='w-100' onClick={() => handleConfirmCancel(row)}><Trash size={15} /></p>
+            {/* <UncontrolledDropdown>
               <DropdownToggle className='pr-1' tag='span'>
                 <MoreVertical size={15} />
               </DropdownToggle>
@@ -262,11 +264,11 @@ const DataTableWithButtons = () => {
                   <span className='align-middle ml-50'>Edit</span>
                 </DropdownItem>
                 <DropdownItem className='w-100' onClick={() => handleConfirmCancel(row)}>
-                  <Trash size={15} />
                   <span className='align-middle ml-50'>Delete</span>
+                  <Trash size={15} />
                 </DropdownItem>
               </DropdownMenu>
-            </UncontrolledDropdown>
+            </UncontrolledDropdown> */}
           </div>
         )
       }
@@ -449,6 +451,82 @@ const DataTableWithButtons = () => {
     { value: '3', label: 'Crew', color: '#5243AA', isFixed: true }
   ]
 
+  const getUserFilterByRole = () => {
+    // /project/members/privilege_groups/<int:project_id>
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/privilege_groups/${id}`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+    
+    axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        // let mem_data = []
+        // const member_data = response.data.data
+        // mem_data = member_data.map(({id, name}) => {
+        //   return {
+        //     value: id,
+        //     label: name
+        //   }
+        // })
+
+        setMemberPrevileges(response.data.data)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
+  const addPrivilege_list = () => {
+    getUserFilterByRole()
+    setShowPrivilege(true)
+    const config = {
+        method: 'get',
+        url: `https://digital-oasis-dev.herokuapp.com/v3/permission/group/list_full_group`,
+        headers: { 
+          Authorization: `Token ${getToken()}`
+        }
+      }
+
+      axios(config)
+    .then(function (response) {
+      console.log(response)
+      if (response.data.status === 200) {
+        const priviele_rs = response.data.data
+        const p_data = []
+
+        priviele_rs.forEach(element => {
+
+          p_data.push({
+            value : element.id,
+            label :element.name
+          })
+          
+        })
+        // console.log(p_data)
+
+        setPrivilegeData(p_data)
+        // setEditShow(true)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+      // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
+  }
+
   return (
     <Fragment>
       <Card>
@@ -460,7 +538,7 @@ const DataTableWithButtons = () => {
               <Plus size={15} />
               <span className='align-middle ml-50'>Add Users</span>
             </Button>
-            <Button className='ml-2' color='primary' onClick={() => setShowPrivilege(true)}>
+            <Button className='ml-2' color='primary' onClick={() => addPrivilege_list()}>
               <Plus size={15} />
               <span className='align-middle ml-50'>Add Privilege</span>
             </Button>
@@ -517,7 +595,7 @@ const DataTableWithButtons = () => {
       </Card>
       <AddMember show={show} setShow={setShow} getProjectMembers={getProjectMembers} />
       <EditMember show={editShow} setShow={setEditShow} getProjectMembers={getProjectMembers} memberData={dataforEdit} role={role}/>
-      <AddPrivilege show={setPrivilege} setShow={setShowPrivilege} getProjectMembers={getProjectMembers}/>
+      <AddPrivilege show={setPrivilege} setShow={setShowPrivilege} getProjectMembers={getProjectMembers} PERMISSIONS={dataprivilege} memberPrevileges={memberPrevileges} />
       
       {/* <AddNewModal open={modal} handleModal={handleModal} /> */}
     </Fragment>

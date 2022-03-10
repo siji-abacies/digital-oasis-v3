@@ -38,25 +38,26 @@ import 'uppy/dist/uppy.css'
 import '@uppy/status-bar/dist/style.css'
 import { useDispatch } from 'react-redux'
 import Avatar from '@components/avatar'
+import { element } from 'prop-types'
 
-const PERMISSIONS = [
-  { value: 1, label: 'Create Project'}, 
-  { value: 2, label: 'Clock Manager'}, 
-  { value: 3, label: 'Add Clients'}, 
-  { value: 4, label: 'Add Presenters'}, 
-  { value: 5, label: 'Add Crew'}, 
-  { value: 6, label: 'Schedule Builder'}, 
-  { value: 7, label: 'Room Builder'}, 
-  { value: 8, label: 'Layout Editor'}, 
-  { value: 9, label: 'Share Room'}, 
-  { value: 10, label: 'Presenter'}, 
-  { value: 11, label: 'MultiRoom'}, 
-  { value: 12, label: 'System Startup'}, 
-  { value: 13, label: 'System Shutdown'}, 
-  { value: 14, label: 'IFB'}, 
-  { value: 15, label: 'Agenda Control'} 
+// const PERMISSIONS = [
+//   { value: 1, label: 'Create Project'}, 
+//   { value: 2, label: 'Clock Manager'}, 
+//   { value: 3, label: 'Add Clients'}, 
+//   { value: 4, label: 'Add Presenters'}, 
+//   { value: 5, label: 'Add Crew'}, 
+//   { value: 6, label: 'Schedule Builder'}, 
+//   { value: 7, label: 'Room Builder'}, 
+//   { value: 8, label: 'Layout Editor'}, 
+//   { value: 9, label: 'Share Room'}, 
+//   { value: 10, label: 'Presenter'}, 
+//   { value: 11, label: 'MultiRoom'}, 
+//   { value: 12, label: 'System Startup'}, 
+//   { value: 13, label: 'System Shutdown'}, 
+//   { value: 14, label: 'IFB'}, 
+//   { value: 15, label: 'Agenda Control'} 
   
-]
+// ]
 
 const userRoles = [
   { value: '1', label: 'System Admin', color: '#00B8D9', isFixed: true },
@@ -70,91 +71,95 @@ const role = {
   3: { title: 'Client', color: 'light-primary' }
 }
 
-const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
+const AddNewModal = ({ show, setShow, getProjectList, PERMISSIONS, memberPrevileges, ToastContent}) => {
   const history = useHistory()
   const token = localStorage.getItem('token')
   const dispatch = useDispatch()
   const { id } = useParams()
-
-  const [memberPrevileges, setMemberPrevileges] = useState([])
+console.log(memberPrevileges)
+  // const [memberPrevileges, setMemberPrevileges] = useState([])
 
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [inputData, setInputData] = useState([])
+  const [permission_gid, setPermissionGID] = useState([])
   const showColorPicker = () => {
     const picker1 = colorPkr === 'colorPkrClose' ? 'colorPkrShow' : 'colorPkrClose'
     setColorPkr(picker1)
   }
   const [project_m_id, setProjectMID] = useState([])
   const [project_add_g, setProjectAddGroup] = useState([])
-  const getUserFilterByRole = (role) => {
-    // /project/members/privilege_groups/<int:project_id>
-    const config = {
-      method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/privilege_groups/${id}`,
-      headers: { 
-        Authorization: `Token ${getToken()}`
-      }
-    }
+  
+
+  // const onChangeRole = (updateRole) => {
+  //   getUserFilterByRole(updateRole.value)
+  // }
+
+  // useEffect(() => {
+  //   getUserFilterByRole(1)
     
-    axios(config)
-    .then(function (response) {
-      console.log(response)
-      if (response.data.status === 200) {
-        // let mem_data = []
-        // const member_data = response.data.data
-        // mem_data = member_data.map(({id, name}) => {
-        //   return {
-        //     value: id,
-        //     label: name
-        //   }
-        // })
-
-        setMemberPrevileges(response.data.data)
-      } else if (response.data.status === 401) {
-        history.push('/login')
-      }
-      // console.log(JSON.stringify(response.data))
-    })
-    .catch(function (error) {
-      console.log(error)
-      // history.push('/login')
-    })
-  }
-
-  const onChangeRole = (updateRole) => {
-    getUserFilterByRole(updateRole.value)
-  }
-
-  useEffect(() => {
-    getUserFilterByRole(1)
-    
-  }, [dispatch])
+  // }, [dispatch])
 
   const { register, errors, handleSubmit, control } = useForm()
       
   const onChangePrivilege = (index, e) => {
-    // console.log(index, e)
-    // const values = [...inputFields]
-    // values.push({ key: '', value: '' })
-    
     const permission_values = []
-    e.forEach(element => {
-      console.log(element.value)
-      // permission_values.push(element.value)
-      project_m_id.push(index)
-      project_add_g.push(element.value)
-      // prj_id.push(index)
+    let d = []
+    const grup = []
+    const project_mg_id = []
+    inputData.forEach(element => { 
+      project_mg_id.push(element.project_member_id)
     })
     
-    const d = {
-      project_member_id: project_m_id, 
-      remove_groups: [], 
-      add_groups: project_add_g
-    }
+    console.log(project_mg_id)
     
-    console.log(d)
-    inputData.push(d)
+    if (inputData.length > 0) {
+      console.log('greaterthan 0')
+      // project_mg_id.forEach(element => { 
+      if (project_mg_id.find(element => element === index)) {
+        console.log('yes')
+        inputData.forEach(element => { 
+          if (element.project_member_id === index) {
+            let group_val = null
+            e.forEach(element => { group_val = element.value })
+            element.add_groups.push(group_val)
+            
+          }
+        })
+      } else {
+          console.log('no')
+          e.forEach(element => {
+            grup.push(element.value)
+            d = {
+             project_member_id: index, 
+             remove_groups: [], 
+             add_groups: grup
+           }
+           inputData.push(d)
+          })
+      
+        }
+        
+      // })
+    } else {
+      console.log('lessthan 0')
+      e.forEach(element => {
+        grup.push(element.value)
+
+         d = {
+          project_member_id: index, 
+          remove_groups: [], 
+          add_groups: grup
+        }
+        project_mg_id.push(index)
+        inputData.push(d)
+      })
+    }
+   
+    
+    // console.log(d)
+    
+    
     console.log(inputData)
     // [ { "project_member_id": id, "remove_groups": [group_id_1, group_id_2], "add_groups": [permission_group_id] } ]
   }
@@ -163,7 +168,9 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
   //   console.log(e.target.privileges)
   // }
 
-  const onSubmit = data => {
+  const onSubmit = () => {
+    // e.preventDefault()
+    console.log('onsubmit')
     console.log(JSON.stringify(inputData))
     // console.log(data)
     // // [ { "project_member_id": id, "remove_groups": [group_id_1, group_id_2], "add_groups": [permission_group_id] } ]
@@ -193,38 +200,38 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
     // }
     // console.log(d)
     
-    // const config = {
-    //   method: 'post',
-    //   url: 'https://digital-oasis-dev.herokuapp.com/v3/project?time_zone=Asia/Kolkata',
-    //   headers: { 
-    //     ContentType: 'application/json',
-    //     Authorization: `Token ${token}`
-    //   }, 
-    //   data : d
-    // }
+    const config = {
+      method: 'post',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/members/privilege_groups/${id}`,
+      headers: { 
+        ContentType: 'application/json',
+        Authorization: `Token ${getToken()}`
+      }, 
+      data : inputData
+    }
       
-    // axios(config)
-    // .then(function (response) {
-    // console.log(response)
-    // if (response.data.status === 200) {
-    //   getProjectList(1)
-    //   setShow(false)
-    //   toast.success(
-    //   <ToastContent message='Project Successfully Added' />,
-    //     { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-    //   )
-    //   } else if (response.data.status === 409) {
-    //     toast.success(
-    //     <ToastContent message={response.data.message} />,
-    //       { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-    //     )
-    //   }
-    //     // console.log(JSON.stringify(response.data))
-    // })
-    // .catch(function (error) {
-    //   console.log(error)
-    //   // history.push('/login')
-    // })
+    axios(config)
+    .then(function (response) {
+    console.log(response)
+    if (response.data.status === 200) {
+      // getProjectList(1)
+      // setShow(false)
+      // toast.success(
+      // <ToastContent message='Project Successfully Added' />,
+      //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+      // )
+      } else if (response.data.status === 409) {
+        // toast.success(
+        // <ToastContent message={response.data.message} />,
+        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+        // )
+      }
+        // console.log(JSON.stringify(response.data))
+    })
+    .catch(function (error) {
+      console.log(error)
+      history.push('/login')
+    })
 
 
   }
@@ -237,11 +244,18 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
           <h1 className='mb-1'>Privilege Settings</h1>
         </div>
         {/* <Form onSubmit={handleSubmit(onSubmit)}> */}
-        {/* <Form onSubmit={handleSubmit(onSubmit)}> */}
-        <Form onSubmit={onSubmit}>
+        <Form onSubmit={handleSubmit(onSubmit)}>
+        {/* <Form onSubmit={onSubmit}> */}
         {/* <p className='fw-bolder pt-50 mt-2'>12 Members</p> */}
           <ListGroup flush className='mb-2'>
             {memberPrevileges.map((item, index) => {
+
+              console.log(memberPrevileges)
+              item.permission_groups.forEach(element => {
+                setPermissionGID(element.permission_group_id)
+                console.log(element.permission_group_id)
+                
+              })
               return (
                 <ListGroupItem key={item.id} className='d-flex align-items-start border-0 px-0'>
                   
@@ -287,7 +301,7 @@ const AddNewModal = ({ show, setShow, type, getProjectList, ToastContent }) => {
                     <Select
                       isClearable={false}
                       theme={selectThemeColors}
-                      // defaultValue={[userRoles[2], userRoles[3]]}
+                      // defaultValue={[PERMISSIONS[1], PERMISSIONS[2]]}
                       isMulti
                       name='privileges'
                       id={`react-select_${item.id}`}

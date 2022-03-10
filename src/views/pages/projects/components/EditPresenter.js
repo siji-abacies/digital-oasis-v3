@@ -48,7 +48,7 @@ import {
   import { useDispatch } from 'react-redux'
   import { toast, Slide } from 'react-toastify'
 
-  const AddNewModal = ({ show, setShow, presenterData, getPresenters, ToastContent }) => {
+  const AddNewModal = ({ show, setShow, presenterData, getPresenters, ToastContent, rowsPerPage}) => {
     
   const dispatch = useDispatch()
 
@@ -77,6 +77,10 @@ import {
   const [hdRecord, sethdRecord] = useState(presenterData.hd_local_recording)
   const [sendMail, setSendMail] = useState(presenterData.send_email)
   const [password_protected, setPasswordProtected] = useState(presenterData.is_password_protected)
+  const [checked_value, setChecked] = useState(false)
+  const [isoRecord_checked, setIsoRecordChecked] = useState(false)
+  const [hdRecord_checked, setHdRecordChecked] = useState(false)
+  const [sendMail_checked, setSendMailChecked] = useState(false)
 
   useEffect(() => {
     let len
@@ -84,6 +88,24 @@ import {
       console.log("edit")
       len = presenterData.custom_fields.length
       setCount(len)
+      if (presenterData.is_password_protected === true) {
+        setChecked(true)
+      } else {
+        setChecked(false)
+      }
+      if (presenterData.iso_recording === true) {
+        setIsoRecordChecked(true)
+      } else {
+        setIsoRecordChecked(false)
+      }
+      if (presenterData.hd_local_recording === true) {
+        setHdRecordChecked(true)
+      } else {
+        setHdRecordChecked(false)
+      }
+      if (presenterData.send_email === true) {
+        setSendMailChecked(true)
+      }
       setCustomFields(presenterData.custom_fields)
     } else {
       len = 1
@@ -252,7 +274,7 @@ import {
       .then(function (response) {
       console.log(response)
       if (response.data.status === 200) {
-        getPresenters()
+        getPresenters(1, rowsPerPage)
         // getProjectMembers()
         setShow(false)
         toast.success(
@@ -368,7 +390,7 @@ import {
               <CustomInput inline name='iso_record' type='checkbox' id='iso_record' label='ISO Record'
                 innerRef={register({ required: false })} 
                 invalid={errors.iso_record && true} 
-                defaultChecked={isoRecord}  
+                defaultChecked={isoRecord_checked}  
                 onChange={e => setIsoRecord(e.target.checked)} 
                 // defaultChecked={presenterData.iso_recording}
               />
@@ -378,7 +400,7 @@ import {
               <CustomInput inline name='hd_record' type='checkbox' id='hd_record' label='High Quality Local Record'
                 innerRef={register({ required: false })} 
                 invalid={errors.hd_record && true} 
-                defaultChecked={hdRecord}  
+                defaultChecked={hdRecord_checked}  
                 onChange={e => sethdRecord(e.target.checked)} 
                 // defaultChecked={presenterData.hd_local_recording}
               />
@@ -387,7 +409,7 @@ import {
             <Col md={3} xs={12} className='mt-1'>
               <CustomInput inline type='checkbox' id='send_email' name='send_email' label='Send Email' 
               innerRef={register({ required: false })} 
-                defaultChecked={sendMail}  
+                defaultChecked={sendMail_checked}  
                 onChange={e => setSendMail(e.target.checked)}/>
 
             </Col>
@@ -413,7 +435,7 @@ import {
                 innerRef={register({ required: false })} 
                 invalid={errors.password_protected && true} 
                 defaultValue={password_protected} 
-                defaultChecked
+                defaultChecked={checked_value}
                 onChange={e => setPasswordProtected(e.target.checked)} 
               />
 
@@ -423,7 +445,7 @@ import {
                 Password
               </Label>
               <Input
-                  type='text'
+                  type={password_protected === false ? "text" : "password"}
                   id='password'
                   name='password'
                   placeholder='' 

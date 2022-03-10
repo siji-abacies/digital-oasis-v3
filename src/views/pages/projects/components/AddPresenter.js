@@ -46,7 +46,7 @@ import {
   import { useParams } from 'react-router-dom'
   import axios from 'axios'
   import { toast, Slide } from 'react-toastify'
-  const AddNewModal = ({ show, setShow, getPresenters, ToastContent}) => {
+  const AddNewModal = ({ show, setShow, getPresenters, ToastContent, rowsPerPage}) => {
   const { id } = useParams()
 
     const type = [
@@ -64,6 +64,7 @@ import {
   const [isoRecord, setIsoRecord] = useState(true)
   const [hdRecord, sethdRecord] = useState(false)
   const [sendMail, setSendMail] = useState(true)
+  const [password_protected_state, setPasswordProtected] = useState('')    
 
   const [inputFields, setInputFields] = useState([{ key: '', value: '' }])
 
@@ -211,7 +212,7 @@ import {
       .then(function (response) {
       console.log(response)
       if (response.data.status === 200) {
-        getPresenters()
+        getPresenters(1, rowsPerPage)
         // getProjectMembers()
         setShow(false)
         console.log(ToastContent)
@@ -365,7 +366,7 @@ import {
                 innerRef={register({ required: false })} 
                 invalid={errors.password_protected && true} 
                 defaultChecked 
-                // onChange={e => setIsoRecord(e.target.checked)} 
+                onChange={e => setPasswordProtected(e.target.checked)} 
               />
 
             </Col>
@@ -374,7 +375,8 @@ import {
                 Password
               </Label>
               <Input
-                  type='text'
+                  type={password_protected_state === false ? "text" : "password"}
+                  // type='text'
                   id='password'
                   name='password'
                   placeholder='' 

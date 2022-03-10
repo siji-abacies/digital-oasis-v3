@@ -32,14 +32,18 @@ import {
    import ReactColorPicker from '@super-effective/react-color-picker'
   
 import { useParams } from 'react-router-dom'
+import { toast, Slide } from 'react-toastify'
 import axios from 'axios'
+
 import Uppy from '@uppy/core'
 import { DragDrop } from '@uppy/react'
 import thumbnailGenerator from '@uppy/thumbnail-generator'
 import 'uppy/dist/uppy.css'
 import '@uppy/status-bar/dist/style.css'
 
-  const AddNewModal = ({ show, setShow, roomList }) => {
+  const AddNewModal = ({ show, setShow, roomList, ToastContent, rowsPerPage}) => {
+    console.log(ToastContent)
+
     const { id } = useParams()
 
     const type = [
@@ -157,15 +161,15 @@ import '@uppy/status-bar/dist/style.css'
       if (response.data.status === 200) {
         roomList(1, 10)
         setShow(false)
-        // toast.success(
-        // <ToastContent message='Project Successfully Added' />,
-        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-        // )
+        toast.success(
+        <ToastContent message='Room Successfully Added' />,
+          { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+        )
         } else if (response.data.status === 409) {
-          // toast.success(
-          // <ToastContent message={response.data.message} />,
-          //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-          // )
+          toast.success(
+          <ToastContent message={response.data.message} />,
+            { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+          )
         }
           // console.log(JSON.stringify(response.data))
       })
