@@ -148,6 +148,7 @@ const DataTableWithButtons = () => {
   
   const [setPrevilege, setShowPrevilege] = useState(false)
   const [rowsPerPage, setRowsPerPage] = useState(7)
+  const [total, setTotal] = useState(10)
 
   // ** Function to handle Modal toggle
   const handleModal = () => setModal(!modal)
@@ -174,6 +175,8 @@ const DataTableWithButtons = () => {
       if (response.data.status === 200) {
         
         setData(response.data.data)
+        setTotal(response.data.pagination.total)
+
         setAllowContent(true)
         // setCreator(response.data.data.creator)
       } else if (response.data.status === 401) {
@@ -518,6 +521,7 @@ const DataTableWithButtons = () => {
     //   })
     // )
     setRowsPerPage(parseInt(e.target.value))
+    listAgenda(1, e.target.value)
   }
 
   const increaseCount = () => {
@@ -583,22 +587,12 @@ const DataTableWithButtons = () => {
     if (value.length) {
       updatedData = data.filter(item => {
         const startsWith =
-          item.full_name.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.post.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.email.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.age.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.salary.toLowerCase().startsWith(value.toLowerCase()) ||
-          item.start_date.toLowerCase().startsWith(value.toLowerCase()) ||
-          status[item.status].title.toLowerCase().startsWith(value.toLowerCase())
+          item.name.toLowerCase().startsWith(value.toLowerCase()) ||
+          item.description.toLowerCase().startsWith(value.toLowerCase()) 
 
         const includes =
-          item.full_name.toLowerCase().includes(value.toLowerCase()) ||
-          item.post.toLowerCase().includes(value.toLowerCase()) ||
-          item.email.toLowerCase().includes(value.toLowerCase()) ||
-          item.age.toLowerCase().includes(value.toLowerCase()) ||
-          item.salary.toLowerCase().includes(value.toLowerCase()) ||
-          item.start_date.toLowerCase().includes(value.toLowerCase()) ||
-          status[item.status].title.toLowerCase().includes(value.toLowerCase())
+          item.name.toLowerCase().includes(value.toLowerCase()) ||
+          item.description.toLowerCase().includes(value.toLowerCase()) 
 
         if (startsWith) {
           return startsWith
@@ -614,6 +608,7 @@ const DataTableWithButtons = () => {
   // ** Function to handle Pagination
   const handlePagination = page => {
     setCurrentPage(page.selected)
+    listAgenda(page.selected + 1, rowsPerPage)
   }
 
   // ** Custom Pagination
@@ -623,7 +618,7 @@ const DataTableWithButtons = () => {
       nextLabel=''
       forcePage={currentPage}
       onPageChange={page => handlePagination(page)}
-      pageCount={searchValue.length ? filteredData.length / 7 : data.length / 7 || 1}
+      pageCount={searchValue.length ? filteredData.length / rowsPerPage : total / rowsPerPage || 1}
       breakLabel='...'
       pageRangeDisplayed={2}
       marginPagesDisplayed={2}
