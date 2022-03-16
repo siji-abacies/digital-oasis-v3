@@ -72,6 +72,24 @@ const role = {
     // icon: Settings
   }
 }
+const ToastContent = ({ message = null }) => (
+  
+  <>
+  {message !== null && (
+  <Fragment>
+      <div className='toastify-header'>
+      <div className='title-wrapper'>
+          {/* <Avatar size='sm' color='warning' icon={<Coffee size={12} />} /> */}
+          <h6 className='toast-title fw-bold'>{message}</h6>
+      </div>
+      </div>
+      <div className='toastify-body'>
+      {/* <span>You have successfully logged in as an user to Vuexy. Now you can start to explore. Enjoy!</span> */}
+      </div>
+  </Fragment>
+  )}
+  </>
+)
 
 const DataTableWithButtons = () => {
   const { id } = useParams()
@@ -204,7 +222,21 @@ const DataTableWithButtons = () => {
       }
     })
   }
-  
+  const renderPermissions = row => {
+    const r = row.permission_groups.map(p => p.name)
+    const reducedArray = row.permission_groups.reduce((id, gp) => `${id}${gp.name}, `, '')
+    const abc = reducedArray.substring(0, reducedArray.length - 1)
+    console.log(r, reducedArray)
+    console.log(abc)
+    return (
+       
+      <span className='text-truncate text-capitalize align-middle'>
+        {reducedArray.slice(0, -1)}
+     
+      </span>
+    )
+  }
+
   // ** Table Common Column
   const columns = [
     {
@@ -234,9 +266,10 @@ const DataTableWithButtons = () => {
     },
     {
       name: 'Privilege Groups',
-      selector: 'group',
+      selector: 'permission_groups',
       sortable: true,
-      minWidth: '150px'
+      minWidth: '150px',
+      cell: row => renderPermissions(row)
     },
     {
       name: 'Updated',
@@ -593,12 +626,26 @@ const DataTableWithButtons = () => {
           // selectableRowsComponent={BootstrapCheckbox}
         />
       </Card>
-      <AddMember show={show} setShow={setShow} getProjectMembers={getProjectMembers} />
-      <EditMember show={editShow} setShow={setEditShow} getProjectMembers={getProjectMembers} memberData={dataforEdit} role={role}/>
-      {/* <AddPrivilege show={setPrivilege} setShow={setShowPrivilege} getProjectMembers={getProjectMembers} PERMISSIONS={dataprivilege} memberPrevileges={memberPrevileges} /> */}
-      <AddPrivilege show={setPrivilege} setShow={setShowPrivilege} getProjectMembers={getProjectMembers} PERMISSIONS={dataprivilege} />
+      <AddMember 
+        show={show} 
+        setShow={setShow} 
+        getProjectMembers={getProjectMembers} 
+      />
+      <EditMember 
+        show={editShow} 
+        setShow={setEditShow} 
+        getProjectMembers={getProjectMembers} 
+        memberData={dataforEdit} 
+        role={role}
+      />
+      <AddPrivilege 
+        show={setPrivilege} 
+        setShow={setShowPrivilege} 
+        getProjectMembers={getProjectMembers} 
+        PERMISSIONS={dataprivilege} 
+        ToastContent={ToastContent}
+      />
       
-      {/* <AddNewModal open={modal} handleModal={handleModal} /> */}
     </Fragment>
   )
 }

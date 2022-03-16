@@ -38,6 +38,7 @@ import moment from 'moment'
 // import { tz } from 'moment-timezone'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import Cleave from 'cleave.js/react'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
   
 const MySwal = withReactContent(Swal)
@@ -50,14 +51,14 @@ const AddNewModal = ({ show, setShow }) => {
   const [currentPage, setCurrentPage] = useState(0)
   const [searchValue, setSearchValue] = useState('')
   const [picker, setPicker] = useState(new Date())
-
+  const [invalid, setInvalid] = useState('')
   const [color, setColor] = useState('#3cd6bf')
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [count, setCount] = useState(1)
   const [showlist, setShowList] = useState('show-list')
   const [showitem, setShowItem] = useState('hide-add-item')
   const [singleItem, setSingleItem] = useState([])
-
+  const options = { numeral: true, numeralThousandsGroupStyle: 'thousand' }
   const {
         reset,
         register,
@@ -73,6 +74,7 @@ const AddNewModal = ({ show, setShow }) => {
   }
 
   const goback = () => {
+    reset()
     setShowList('show-list')
     setShowItem('hide-add-item')
     setSingleItem([])
@@ -282,61 +284,67 @@ const AddNewModal = ({ show, setShow }) => {
 
   const onSubmit = data => {
     console.log(singleItem)
-    let utc_time = JSON.stringify(data.expiry_date)
-    console.log(utc_time)
-    utc_time = utc_time.slice(2, 21)
-      
-    console.log(data, utc_time)
-    const d = { 
-      name: data.name,
-      expiry_at: utc_time,
-      is_open: data.is_open, 
-      is_password_protected: data.is_password_protected, 
-      allowed_users: parseInt(data.users), 
-      one_time_use: data.one_time_use, 
-      password: data.password 
-    }
-    console.log(d)
-
-    const url = singleItem.length !== 0 ? `project/teleprompter/${singleItem.id}/${id}` : `project/teleprompter/${id}`
-    const _method = singleItem.length !== 0 ? 'put' : 'post'
-    const config = {
-      method: _method,
-      url: `https://digital-oasis-dev.herokuapp.com/v3/${url}`,
-      headers: { 
-        ContentType: 'application/json',
-        Authorization: `Token ${getToken()}`
-      }, 
-      data : d
-    }
-
-    console.log(config)
-    axios(config)
-    .then(function (response) {
-      console.log(response)
-      if (response.data.status === 200) {
-        reset()
-        listTeleprompter()
-        setShowList('show-list')
-        setShowItem('hide-add-item')
-        setSingleItem([])
-        // setShow(false)
-        // toast.success(
-        // <ToastContent message='Project Successfully Added' />,
-        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-        // )
-        } else if (response.data.status === 409) {
+    console.log(data)
+    if (data.expiry_date !== undefined) {
+      let utc_time = JSON.stringify(data.expiry_date)
+      console.log(utc_time)
+      utc_time = utc_time.slice(2, 21)
+        
+      console.log(data, utc_time)
+      const d = { 
+        name: data.name,
+        expiry_at: utc_time,
+        is_open: data.is_open, 
+        is_password_protected: data.is_password_protected, 
+        allowed_users: parseInt(data.users), 
+        one_time_use: data.one_time_use, 
+        password: data.password 
+      }
+      console.log(d)
+  
+      const url = singleItem.length !== 0 ? `project/teleprompter/${singleItem.id}/${id}` : `project/teleprompter/${id}`
+      const _method = singleItem.length !== 0 ? 'put' : 'post'
+      const config = {
+        method: _method,
+        url: `https://digital-oasis-dev.herokuapp.com/v3/${url}`,
+        headers: { 
+          ContentType: 'application/json',
+          Authorization: `Token ${getToken()}`
+        }, 
+        data : d
+      }
+  
+      console.log(config)
+      axios(config)
+      .then(function (response) {
+        console.log(response)
+        if (response.data.status === 200) {
+          reset()
+          listTeleprompter()
+          setShowList('show-list')
+          setShowItem('hide-add-item')
+          setSingleItem([])
+          // setShow(false)
           // toast.success(
-          // <ToastContent message={response.data.message} />,
+          // <ToastContent message='Project Successfully Added' />,
           //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
           // )
-        }
-          // console.log(JSON.stringify(response.data))
-    })
-    .catch(function (error) {
-      console.log(error)
-        // history.push('/login')
-    })
+          } else if (response.data.status === 409) {
+            // toast.success(
+            // <ToastContent message={response.data.message} />,
+            //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+            // )
+          }
+            // console.log(JSON.stringify(response.data))
+      })
+      .catch(function (error) {
+        console.log(error)
+          // history.push('/login')
+      })
+    } else {
+      setInvalid('invalid')
+    }
+    
   }
 
   return (
@@ -402,7 +410,7 @@ const AddNewModal = ({ show, setShow }) => {
                     control={control}
                     id='date-time-picker'
                     name='expiry_date' 
-                    className='form-control' 
+                    className={`form-control ${invalid}`} 
                     // dateFormat='Y-m-d h:mm:ss'
                     // defaultValue={singleItem !== [] ? singleItem.expiry_at : new Date()}
                     // defaultValue={moment('2022-03-12 12:00:00', "YY-MM-DD HH:mm:ss").format("DD/MM/YYYY hh:mm A")}
@@ -426,7 +434,16 @@ const AddNewModal = ({ show, setShow }) => {
                 <Label className='form-label' for='item_name'>
                   No of allowed users
                 </Label>
-                <Input
+                <Cleave 
+                  className='form-control' 
+                  placeholder='10' 
+                  options={options} 
+                  id='users' 
+                  name='users' 
+                  defaultValue={singleItem !== [] ? singleItem.allowed_users : ''}
+                  innerRef={register({ required: true })}
+                  invalid={errors.users && true} />
+                {/* <Input
                   type='text'
                   id='users'
                   name='users'
@@ -434,7 +451,7 @@ const AddNewModal = ({ show, setShow }) => {
                   placeholder='10' 
                   innerRef={register({ required: true })}
                   invalid={errors.users && true}
-                />
+                /> */}
                 </FormGroup>
             </Col>
             <Row style={{marginLeft: '0.1em'}}>
