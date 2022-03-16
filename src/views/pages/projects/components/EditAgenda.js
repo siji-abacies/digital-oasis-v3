@@ -42,13 +42,23 @@ import {
 
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
+import { inArray } from 'jquery'
   const AddNewModal = ({ show, setShow, presenters, users, ItemData }) => {
     const { id } = useParams()
-  const [basic, setBasic] = useState(new Date())
+    const [basic, setBasic] = useState('00:30')
   const [rooms, setRooms] = useState([])
   const [inputFields, setInputFields] = useState([{ key: '', value: '' }])
+  const [customFields, setCustomFields] = useState([])
   const [teleprompter, setTeleprompter] = useState([])
-  
+  const [invalid_members, setInvalidMembers] = useState('')
+  const [invalid_presenters, setInvalidPresenters] = useState('')
+  const [invalid_tele, setInvalidTele] = useState('')
+  const [invalid_pre_stage, setInvalidPreStage] = useState('')
+  const [invalid_post_stage, setInvalidPostStage] = useState('')
+  const [invalid_stage, setInvalidStage] = useState('')
+  const [oldMembers, setOldMembers] = useState([])
+  const [oldPresenters, setOldPresenters] = useState([])
+
   const userRoles = [
     { value: '1', label: 'System Admin', color: '#00B8D9', isFixed: true },
     { value: '2', label: 'Client', color: '#0052CC', isFixed: true },
@@ -71,12 +81,30 @@ import axios from 'axios'
   let post_stage = []
   let pre_stage = []
   let stage = []
+  let members = []
+  let default_presenters = []
   let teleprompter_default = []
   if (ItemData.length !== 0) {
     post_stage = ItemData.post_stage
     pre_stage = ItemData.pre_stage
     stage = ItemData.stage
     teleprompter_default = ItemData.teleprompter
+
+    
+    members = ItemData.members.map(({id, name}) => {
+      return {
+        value: id,
+        label: name
+      }
+    })
+     
+    default_presenters = ItemData.presenters.map(({id, name}) => {
+      return {
+        value: id,
+        label: name
+      }
+    })
+
     // console.log(a)
     post_stage = post_stage.map(({id, name}) => {
       return {
@@ -107,20 +135,33 @@ import axios from 'axios'
 
   const increaseCount = () => {
     setCount(count + 1)
-    const values = [...inputFields]
+    const values = [...customFields]
     values.push({ key: '', value: '' })
-    setInputFields(values)
+    setCustomFields(values)
   }
 
   const deleteForm = e => {
+    console.log(i)
+    const items = customFields.filter((item, itemIndex) => {
+      return itemIndex !== i 
+    })
+    
+    console.log(items)
+    setCount(items.length)
+    console.log(items.length)
     e.preventDefault()
     const slideDownWrapper = e.target.closest('.react-slidedown'),
       form = e.target.closest('form')
     if (slideDownWrapper) {
-      slideDownWrapper.remove()
+      console.log("Wrapper")
+      setCustomFields(items)
+      // slideDownWrapper.remove()
+
     } else {
       form.remove()
+      
     }
+    
   }
 
   const onColorChange = (updatedColor) => {
@@ -220,18 +261,166 @@ import axios from 'axios'
     }
 
     useEffect(() => {
-      // console.log(memberData.user_role)
+      if (ItemData && ItemData.custom_fields && ItemData.custom_fields.length > 0) {
+        console.log("edit")
+        const len = ItemData.custom_fields.length
+        setCount(len)
+        setCustomFields(ItemData.custom_fields)
+      }
+      if (ItemData && ItemData.members && ItemData.members.length > 0) {
+        setOldMembers(ItemData.members)
+        // setOldPresenters(ItemData.presenters)
+      }
+      if (ItemData && ItemData.presenters && ItemData.presenters.length > 0) {
+        // setOldMembers(ItemData.members)
+        setOldPresenters(ItemData.presenters)
+      }
       
       listRooms()
       listTeleprompter()
     }, [ItemData])
 
+    const setRunTime = (e) => {
+      const r = new Date(e)
+      const time = moment(r).format('HH:mm')
+      setBasic(time)
+    }
+  
+    const setStartTime = (e) => {
+      setPicker(e[0])
+    }
+
     const onSubmit = data => {
-      console.log(inputFields)
+      console.log(data)
+      console.log(data.pre_stage_room)
+      let add_members = []
+    let add_presenter = []
+    const remove_member = []
+    const teleprompter =  data.teleprompter
+    let telep_val = ''
+    let pre_stage_val = ''
+    let post_stage_val = ''
+    let stage_val = ''
+
+    if (data.users !== undefined) {
+      setInvalidMembers('')
+      const proj_users = data.users
+
+      const old_mem_ids = []
+      const mem_ids = []
+      const add = []
+      proj_users.forEach(element => {
+        mem_ids.push(element.value)
+      })
+
+      oldMembers.forEach(element => {
+        old_mem_ids.push(element.id)
+        if (!mem_ids.includes(element.id)) {
+          remove_member.push(element.id)
+        }
+      })
+      console.log(proj_users)
+      proj_users.forEach(element => {
+        console.log(element.value)
+        if (!old_mem_ids.includes(element.value)) {
+        // if (!inArray(element.value, old_mem_ids)) {
+          add.push(element)
+          
+        } 
+      }) 
+      
+
+      console.log(old_mem_ids, add, remove_member)
+      //add members
+      add_members = add.map(({value, label}) => {
+        return {
+          id : value,
+          name: label
+        }
+      })
+    } else {
+      setInvalidMembers('invalid_members')
+    }
+
+    if (data.presenters !== undefined) {
+      setInvalidPresenters('')
+      //add presenters
+      const pre_ids = []
+      const old_pre_ids = []
+      const add_pres = []
+      const proj_presenters =  data.presenters
+      console.log(presenters)
+
+      proj_presenters.forEach(element => {
+        pre_ids.push(element.value)
+      })
+
+      oldPresenters.forEach(element => {
+        old_pre_ids.push(element.id)
+        if (!pre_ids.includes(element.id)) {
+          remove_member.push(element.id)
+        }
+      })
+
+      proj_presenters.forEach(element => {
+        // console.log(element.value)
+        if (!old_pre_ids.includes(element.value)) {
+        // if (!inArray(element.value, old_mem_ids)) {
+          add_pres.push(element)
+          
+        } 
+      }) 
+
+      add_presenter = add_pres.map(({value, label}) => {
+        return {
+          id : value,
+          name: label
+        }
+      })
+    } else {
+      setInvalidPresenters('invalid_presenters')
+    }
+    
+    if (teleprompter !== undefined) {
+      setInvalidTele('')
+      telep_val = teleprompter.value
+    } else {
+      setInvalidTele('invalid_tele')
+    }
+
+    if (data.pre_stage_room !== undefined) {
+      console.log("def")
+      setInvalidPreStage('')
+      pre_stage_val = data.pre_stage_room.value
+    } else {
+      console.log("undef")
+
+      setInvalidPreStage('invalid_pre_stage')
+    }
+
+    if (data.post_stage_room !== undefined) {
+      setInvalidPostStage('')
+      post_stage_val = data.post_stage_room.value
+    } else {
+      setInvalidPostStage('invalid_post_stage')
+    }
+
+    if (data.stage_room !== undefined) {
+      setInvalidStage('')
+      stage_val = data.stage_room.value
+    } else {
+      setInvalidStage('invalid_stage')
+    }
+
+    if (data.pre_stage_room !== undefined || data.post_stage_room !== undefined || data.stage_room !== undefined) {
+     
+
+      console.log(oldMembers)
+      console.log(oldPresenters)
 
       let formated_time = JSON.stringify(data.start_at)
       console.log(formated_time)
-      formated_time = formated_time.slice(2, 21)
+      formated_time = formated_time.slice(1, 20)
       console.log(formated_time)
 
       // let formated_run_time = JSON.stringify(data.run_time)
@@ -241,26 +430,26 @@ import axios from 'axios'
 
       console.log(data)
       console.log(data.users)
-      let add_members = []
-      add_members = data.users.map(({value, label}) => {
-        return {
-          id : value,
-          name: label
-        }
-      })
-      let add_presenter = []
-      const presenters =  data.presenters
-      console.log(presenters)
-      add_presenter = presenters.map(({value, label}) => {
-        return {
-          id : value,
-          name: label
-        }
-      })
+      // let add_members = []
+      // add_members = data.users.map(({value, label}) => {
+      //   return {
+      //     id : value,
+      //     name: label
+      //   }
+      // })
+      // let add_presenter = []
+      // const presenters =  data.presenters
+      // console.log(presenters)
+      // add_presenter = presenters.map(({value, label}) => {
+      //   return {
+      //     id : value,
+      //     name: label
+      //   }
+      // })
 
       // let teleprompters = []
-      const teleprompter =  data.teleprompter
-      console.log(teleprompter.value)
+      // const teleprompter =  data.teleprompter
+      // console.log(teleprompter.value)
       // let teleprompters = ''
       // teleprompters = teleprompter.map(({value}) => {
       //   teleprompters = value
@@ -276,19 +465,22 @@ import axios from 'axios'
         description: data.item_description, 
         run_time_expected: 30, 
         // run_time_expected: data.run_time, 
-        pre_stage_id: data.pre_stage_room.value, 
-        post_stage_id: data.post_stage_room.value, 
-        stage_id: data.stage_room.value,
-        custom_fields: [], 
+        pre_stage_id: pre_stage_val, 
+        post_stage_id: post_stage_val, 
+        stage_id: stage_val,
+        custom_fields: customFields, 
         teleprompter_id: teleprompter.value, 
         add_users: add_members, 
-        add_presenters: add_presenter
+        add_presenters: add_presenter, 
+        remove_members: remove_member
+        // remove_presenters: []
       }
+      // {"name": "Agendaname", "start_at": "2021-11-01T12:12:12", "description": "Description**", "run_time_expected": 30, "pre_stage_id": 1, "post_stage_id": 2, "stage_id": 5, "custom_fields": [{'key': 'New Title', 'value': 'Val'}], 'teleprompter_id': 1, 'remove_members': []}
       console.log(d)
 
       const config = {
-        method: 'post',
-        url: `https://digital-oasis-dev.herokuapp.com/v3/project/agenda/${id}`,
+        method: 'put',
+        url: `https://digital-oasis-dev.herokuapp.com/v3/project/agenda/${id}/${ItemData.id}`,
         headers: { 
           ContentType: 'application/json',
           Authorization: `Token ${getToken()}`
@@ -321,6 +513,7 @@ import axios from 'axios'
       console.log(error)
         // history.push('/login')
     })
+    }
 
     }
 
@@ -385,6 +578,60 @@ import axios from 'axios'
                     control={control}
                     defaultValue={picker} 
                     data-enable-time
+                    id='date-time-picker' 
+                    // minDate='today'
+                    name='start_at'
+                    innerRef={register({ required: true })}
+                    invalid={errors.start_at && true}
+                    className={`form-control`} 
+                    options={{
+                      altFormat: "d/m/Y h:i K",
+                      altInput: true,
+                      minDate: "today"
+                    }}
+                    onClose={(event) => setStartTime(event)}
+                    // onClose={(event) => setRunTime(event)}
+                  />
+                
+                </FormGroup>
+            </Col>
+            <Col md={6} xs={12}>
+              <FormGroup>
+                <Label for='date-time-picker'>Run Time</Label>
+                  <Controller
+                    as={Flatpickr}
+                    control={control}
+                    defaultValue={basic}
+                    data-enable-time
+                    id='timepicker'
+                    name="run_time"
+                    innerRef={register({ required: true })}
+                    invalid={errors.run_time && true}
+                    className={`form-control`}
+                    options={{
+                      enableTime: true,
+                      noCalendar: true,
+                      dateFormat: 'H:i', 
+                      // altFormat: "i",
+                      // altInput: true,
+                      time_24hr: true
+                    }}
+                    onClose={(event) => setRunTime(event)}
+                    // onChange={() => setRunTime()}
+                    // onselect={() => setRunTime()}
+                  />
+                 
+              </FormGroup>
+            </Col>
+
+            {/* <Col md={6} xs={12}>
+              <FormGroup>
+                <Label for='date-time-picker'>Start Date Time</Label>
+                  <Controller
+                    as={Flatpickr}
+                    control={control}
+                    defaultValue={picker} 
+                    data-enable-time
                     id='date-time-picker'
                     // id='date-time-picker'
                     name='start_at'
@@ -393,7 +640,8 @@ import axios from 'axios'
                     className='form-control' 
                     options={{
                       altFormat: "d/m/Y h:i K",
-                      altInput: true
+                      altInput: true,
+                      minDate: "today"
                     }}
                     onChange={date => setPicker(date)}
                    
@@ -427,7 +675,7 @@ import axios from 'axios'
                   />
                  
               </FormGroup>
-            </Col>
+            </Col> */}
             <Col md={4} xs={12}>
               <FormGroup>
                 <Label for='date-time-picker'>Pre Stage Room</Label>
@@ -439,9 +687,10 @@ import axios from 'axios'
                   control={control}
                   name='pre_stage_room'
                   options={rooms} 
+                  invalid={pre_stage}
                   classNamePrefix='select'  
                   theme={selectThemeColors} 
-                  defaultValue={pre_stage}
+                  defaultValue={pre_stage[0]}
                 />
               </FormGroup>
             </Col>
@@ -456,8 +705,9 @@ import axios from 'axios'
                   name='stage_room'
                   options={rooms} 
                   classNamePrefix='select'  
+                  className={invalid_stage}
                   theme={selectThemeColors} 
-                  defaultValue={stage}
+                  defaultValue={stage[0]}
                 />
               </FormGroup>
             </Col>
@@ -471,9 +721,10 @@ import axios from 'axios'
                   control={control}
                   name='post_stage_room'
                   options={rooms} 
+                  className={invalid_post_stage}
                   classNamePrefix='select'  
                   theme={selectThemeColors} 
-                  defaultValue={post_stage}
+                  defaultValue={post_stage[0]}
                 />
               </FormGroup>
             </Col>
@@ -486,22 +737,14 @@ import axios from 'axios'
                 control={control}
                 name='users'
                 options={users}
-                // className={invalid}
+                className={invalid_members}
                 classNamePrefix='select'  
                 isMulti 
                 theme={selectThemeColors}
+                defaultValue={members}
               />
               
-              {/* <Select
-                isClearable={false}
-                theme={selectThemeColors}
-                // defaultValue={[users[2], users[3]]}
-                isMulti
-                name='users'
-                options={users}
-                className='react-select'
-                classNamePrefix='select'
-              /> */}
+              
             </Col>
             <Col className='mb-1' md='12' sm='12'>
               <Label>Add Presenters</Label>
@@ -512,21 +755,13 @@ import axios from 'axios'
                 control={control}
                 name='presenters'
                 options={presenters}
-                // className={invalid}
+                className={invalid_presenters}
                 classNamePrefix='select'  
                 isMulti 
-                theme={selectThemeColors}
+                theme={selectThemeColors} 
+                defaultValue={default_presenters}
               />
-              {/* <Select
-                isClearable={false}
-                theme={selectThemeColors}
-                // defaultValue={[users[2]]}
-                isMulti
-                name='colors'
-                options={presenters}
-                className='react-select'
-                classNamePrefix='select'
-              /> */}
+              
             </Col>
             <Col md={4} xs={12} className='mb-1'>
                 <CustomInput inline type='checkbox' id='exampleCustomCheckbox' label='Add Teleprompter' defaultChecked />
@@ -543,9 +778,9 @@ import axios from 'axios'
                   control={control}
                   name='teleprompter'
                   options={teleprompter}
-                  // className={invalid}
+                  className={invalid_tele}
                   classNamePrefix='select'  
-                  defaultValue={teleprompter_default}
+                  defaultValue={teleprompter_default[0]}
                   theme={selectThemeColors}
                 />
                 {/* <Select
@@ -563,6 +798,7 @@ import axios from 'axios'
 
             <Col md={12} xs={12} style={{marginTop:'15px'}}>
                 <Label>Custom Fields</Label>
+                {customFields.length > 0 && 
                 <Repeater count={count}>
                   {i => {
                     const Tag = i === 0 ? 'div' : SlideDown
@@ -573,13 +809,25 @@ import axios from 'axios'
                             <Col md={5}>
                               <FormGroup>
                                 <Label for={`animation-item-name-${i}`}>Name</Label>
-                                <Input type='text' id={`animation-item-name-${i}`} name='name' placeholder='TNC' value={inputFields.key} onChange={event => handleInputChange(i, event)} />
+                                <Input type='text' 
+                                  id={`animation-item-name-${i}`} 
+                                  name='name' 
+                                  placeholder='TNC' 
+                                  // value={inputFields.key} 
+                                  defaultValue={customFields[i].key}
+                                  onChange={event => handleInputChange(i, event)} 
+                                />
                               </FormGroup>
                             </Col>
                             <Col md={5}>
                               <FormGroup>
                                 <Label for={`animation-cost-${i}`}>Value</Label>
-                                <Input type='text' id={`animation-cost-${i}`} placeholder='Manager' value={inputFields.value} onChange={event => handleInputChange(i, event)} />
+                                <Input type='text' 
+                                  id={`animation-cost-${i}`} 
+                                  placeholder='Manager' 
+                                  defaultValue={customFields[i].value} 
+                                  onChange={event => handleInputChange(i, event)} 
+                                />
                               </FormGroup>
                             </Col>
                             
@@ -598,6 +846,7 @@ import axios from 'axios'
                     )
                   }}
                 </Repeater>
+                }
               </Col>
               <Button.Ripple className='btn-icon' color='primary' onClick={increaseCount} style={{marginTop:'10px', marginLeft:'15px'}}>
                 <Plus size={14} />

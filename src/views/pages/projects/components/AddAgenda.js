@@ -8,16 +8,6 @@ import {
     Input,
     Label,
     Button,
-    CardTitle,
-    CardHeader,
-    DropdownMenu,
-    DropdownItem,
-    DropdownToggle,
-    UncontrolledButtonDropdown,
-    Badge,
-    UncontrolledDropdown, 
-    CardText, 
-    CardBody, 
     Modal, 
     ModalBody, 
     ModalHeader, 
@@ -27,54 +17,38 @@ import {
   CustomInput
 
   } from 'reactstrap'
-  import { ChevronDown, Share, Printer, FileText, File, Grid, Copy, Plus, MoreVertical, Edit, Archive, Trash, X } from 'react-feather'
+import { Plus, Trash, X } from 'react-feather'
 
-  import { useForm, Controller } from 'react-hook-form'
-  import Select, { components } from 'react-select'
-  import Flatpickr from 'react-flatpickr'
-  import Uppy from '@uppy/core'
-  import { DragDrop } from '@uppy/react'
-  import thumbnailGenerator from '@uppy/thumbnail-generator'
-  import { selectThemeColors, getToken } from '@utils'
-  import ReactColorPicker from '@super-effective/react-color-picker'
-  import Repeater from '@components/repeater'
-  import { SlideDown } from 'react-slidedown'
+import { useForm, Controller } from 'react-hook-form'
+import Select, { components } from 'react-select'
+import Flatpickr from 'react-flatpickr'
+import { selectThemeColors, getToken } from '@utils'
+import Repeater from '@components/repeater'
+import { SlideDown } from 'react-slidedown'
 
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
 import moment from 'moment'
-  const AddNewModal = ({ show, setShow, presenters, users }) => {
-    const { id } = useParams()
-  const [basic, setBasic] = useState(new Date())
+import { toast, Slide } from 'react-toastify'
+
+const AddNewModal = ({ show, setShow, presenters, users, listAgenda, ToastContent }) => {
+  const { id } = useParams()
+  const [basic, setBasic] = useState('00:30')
   const [rooms, setRooms] = useState([])
   const [inputFields, setInputFields] = useState([{ key: '', value: '' }])
   const [teleprompter, setTeleprompter] = useState([])
-  const stage = [
-    { value: '1', label: 'Room 1' },
-    { value: '2', label: 'Room 2' },
-    { value: '3', label: 'Room 3' },
-    { value: '4', label: 'Room 4' },
-    { value: '5', label: 'Room 5' }
-  ]
-  const userRoles = [
-    { value: '1', label: 'System Admin', color: '#00B8D9', isFixed: true },
-    { value: '2', label: 'Client', color: '#0052CC', isFixed: true },
-    { value: '3', label: 'Crew', color: '#5243AA', isFixed: true }
-  ]
-  
-    const type = [
-        { value: '1', label: 'Live', color: '#00B8D9', isFixed: true },
-        { value: '2', label: 'Stage', color: '#0052CC', isFixed: true },
-        { value: '3', label: 'Test', color: '#5243AA', isFixed: true }
-      ]
-
-    // const [show, setShow] = useState(false)
-    const [picker, setPicker] = useState(new Date())
-
-  const [color, setColor] = useState('#3cd6bf')
+  const [invalid, setInvalid] = useState('')
+  const [invalid_members, setInvalidMembers] = useState('')
+  const [invalid_presenters, setInvalidPresenters] = useState('')
+  const [invalid_tele, setInvalidTele] = useState('')
+  const [invalid_pre_stage, setInvalidPreStage] = useState('')
+  const [invalid_post_stage, setInvalidPostStage] = useState('')
+  const [invalid_stage, setInvalidStage] = useState('')
+  const [picker, setPicker] = useState(new Date())
   const [colorPkr, setColorPkr] = useState('colorPkrClose')
   const [count, setCount] = useState(1)
 
+  //Increase Repeater count
   const increaseCount = () => {
     setCount(count + 1)
     const values = [...inputFields]
@@ -82,6 +56,7 @@ import moment from 'moment'
     setInputFields(values)
   }
 
+  //Delete repeater form
   const deleteForm = e => {
     e.preventDefault()
     const slideDownWrapper = e.target.closest('.react-slidedown'),
@@ -93,138 +68,122 @@ import moment from 'moment'
     }
   }
 
-  const onColorChange = (updatedColor) => {
-    setColor(updatedColor)
+  const {
+    reset,
+    register,
+    control,
+    setError,
+    handleSubmit,
+    formState: { errors }
+  } = useForm()
+    
+  // get Room list
+  const listRooms = () => {
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/full_list/${id}`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+      
+    axios(config)
+    .then(function (response) {
+      // console.log(response)
+      if (response.data.status === 200) {
+        const data = response.data.data
+        const r = []
+        data.forEach(element => {
+          r.push({
+            value: element.id,
+            label: element.name
+          })
+        })
+        setRooms(r)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
   }
 
-  const showColorPicker = () => {
-    const picker = colorPkr === 'colorPkrClose' ? 'colorPkrShow' : 'colorPkrClose'
-    setColorPkr(picker)
+  //Get telepromter list
+  const listTeleprompter = () => {
+    const config = {
+      method: 'get',
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/for_assigning/${id}`,
+      headers: { 
+        Authorization: `Token ${getToken()}`
+      }
+    }
+      
+    axios(config)
+    .then(function (response) {
+      // console.log(response)
+      if (response.data.status === 200) {
+        const data = response.data.data
+        const teleprom = []
+        data.forEach(element => {
+          teleprom.push({
+            value: element.id,
+            label: element.name
+          })
+        })
+        setTeleprompter(teleprom)
+      } else if (response.data.status === 401) {
+        history.push('/login')
+      }
+    })
+    .catch(function (error) {
+      console.log(error)
+      // history.push('/login')
+    })
   }
 
-    const {
-        reset,
-        register,
-        control,
-        setError,
-        handleSubmit,
-        formState: { errors }
-      } = useForm({
-        // defaultValues: {
-        //   username: selectedUser.name,
-        //   // lastName: selectedUser.fullName.split(' ')[1],
-        //   // firstName: selectedUser.fullName.split(' ')[0]
-        //   // username: 'Test',
-        //   lastName: 'LastName',
-        //   firstName: 'First name'
-        // }
-      })
-      
-    const listRooms = () => {
-      // /project/room/full_list/<int:project_id>
-      const config = {
-        method: 'get',
-        url: `https://digital-oasis-dev.herokuapp.com/v3/project/room/full_list/${id}`,
-        headers: { 
-          Authorization: `Token ${getToken()}`
-        }
-      }
-      
-      axios(config)
-      .then(function (response) {
-        console.log(response)
-        if (response.data.status === 200) {
-          const data = response.data.data
-          const r = []
-          data.forEach(element => {
-            r.push({
-              value: element.id,
-              label: element.name
-            })
-          })
-          setRooms(r)
-          // setCreator(response.data.data.creator)
-        } else if (response.data.status === 401) {
-          history.push('/login')
-        }
-        // console.log(JSON.stringify(response.data))
-      })
-      .catch(function (error) {
-        console.log(error)
-        // history.push('/login')
-      })
-    }
+  useEffect(() => {
+    listRooms()
+    listTeleprompter()
+  }, [])
 
-    const listTeleprompter = () => {
-      const config = {
-        method: 'get',
-        url: `https://digital-oasis-dev.herokuapp.com/v3/project/teleprompter/for_assigning/${id}`,
-        headers: { 
-          Authorization: `Token ${getToken()}`
-        }
-      }
-      
-      axios(config)
-      .then(function (response) {
-        console.log(response)
-        if (response.data.status === 200) {
-          const data = response.data.data
-          const teleprom = []
-          data.forEach(element => {
-            teleprom.push({
-              value: element.id,
-              label: element.name
-            })
-          })
-          setTeleprompter(teleprom)
-          // setCreator(response.data.data.creator)
-        } else if (response.data.status === 401) {
-          history.push('/login')
-        }
-        // console.log(JSON.stringify(response.data))
-      })
-      .catch(function (error) {
-        console.log(error)
-        // history.push('/login')
-      })
-    }
+  const setRunTime = (e) => {
+    const r = new Date(e)
+    const time = moment(r).format('HH:mm')
+    setBasic(time)
+  }
 
-    useEffect(() => {
-      // console.log(memberData.user_role)
-      listRooms()
-      listTeleprompter()
-    }, [])
+  const setStartTime = (e) => {
+    setPicker(e[0])
+  }
 
-    const onSubmit = data => {
-      console.log(inputFields)
-      console.log(data.run_time)
-      const r = new Date(data.run_time)
-      const time = moment(r).format('HH:mm')
-      console.log(moment(r).format('HH'), moment(r).format('mm'))
-      const r_time = parseInt(moment(r).format('HH') * 60) + parseInt(moment(r).format('mm'))
-      console.log(time, r_time)
-      // console.log(JSON.stringify(data.run_time))
+  const onSubmit = data => {
+    console.log(data)
+    let add_members = []
+    let add_presenter = []
+    const teleprompter =  data.teleprompter
+    let telep_val = ''
+    let pre_stage_val = ''
+    let post_stage_val = ''
+    let stage_val = ''
 
-      let formated_time = JSON.stringify(data.start_at)
-      console.log(formated_time)
-      formated_time = formated_time.slice(2, 21)
-      console.log(formated_time)
-
-      // let formated_run_time = JSON.stringify(data.run_time)
-      // console.log(formated_run_time)
-      // formated_run_time = formated_time.slice(1, 20)
-      // console.log(formated_run_time)
-
-      console.log(data)
-      console.log(data.users)
-      let add_members = []
+    if (data.users !== undefined) {
+      setInvalidMembers('')
+      //add members
       add_members = data.users.map(({value, label}) => {
         return {
           id : value,
           name: label
         }
       })
-      let add_presenter = []
+    } else {
+      setInvalidMembers('invalid_members')
+    }
+
+    if (data.presenters !== undefined) {
+      setInvalidPresenters('')
+      //add presenters
       const presenters =  data.presenters
       console.log(presenters)
       add_presenter = presenters.map(({value, label}) => {
@@ -233,30 +192,62 @@ import moment from 'moment'
           name: label
         }
       })
+    } else {
+      setInvalidPresenters('invalid_presenters')
+    }
+    
+    if (teleprompter !== undefined) {
+      setInvalidTele('')
+      telep_val = teleprompter.value
+    } else {
+      setInvalidTele('invalid_tele')
+    }
 
-      // let teleprompters = []
-      const teleprompter =  data.teleprompter
-      console.log(teleprompter.value)
-      // let teleprompters = ''
-      // teleprompters = teleprompter.map(({value}) => {
-      //   teleprompters = value
-      // })
+    if (data.pre_stage_room !== undefined) {
+      setInvalidPreStage('')
+      pre_stage_val = data.pre_stage_room.value
+    } else {
+      setInvalidPreStage('invalid_pre_stage')
+    }
 
-      // console.log(t)
-      // console.log(teleprompter.slice(1, ))
-      console.log(add_members)
-      // {"name": "Agendaname", "start_at": "2021-11-01T12:12:12", "description": "Description**", "run_time_expected": 30, "pre_stage_id": 1, "post_stage_id": 2, "stage_id": 5, "custom_fields": [{'key': 'New Title', 'value': 'Val'}], 'teleprompter_id': 1, 'add_members': [{}], 'add_presenters': []}
+    if (data.post_stage_room !== undefined) {
+      setInvalidPostStage('')
+      post_stage_val = data.post_stage_room.value
+    } else {
+      setInvalidPostStage('invalid_post_stage')
+    }
+
+    if (data.stage_room !== undefined) {
+      setInvalidStage('')
+      stage_val = data.stage_room.value
+    } else {
+      setInvalidStage('invalid_stage')
+    }
+
+    if (data.pre_stage_room !== undefined || data.post_stage_room !== undefined || data.stage_room !== undefined) {
+      
+      console.log(inputFields)
+      console.log(data.run_time)
+      const time = basic.split(':')
+      const r_time = parseInt(time[0] * 60) + parseInt(time[1])
+      console.log(time, r_time)
+
+      let formated_time = JSON.stringify(picker)
+      console.log(formated_time)
+      formated_time = formated_time.slice(1, 20)
+      console.log(formated_time)
+
       const d = {
         name: data.item_name,
         start_at: formated_time,
         description: data.item_description, 
         run_time_expected: r_time, 
         // run_time_expected: data.run_time, 
-        pre_stage_id: data.pre_stage_room.value, 
-        post_stage_id: data.post_stage_room.value, 
-        stage_id: data.stage_room.value,
-        custom_fields: [], 
-        teleprompter_id: teleprompter.value, 
+        pre_stage_id: pre_stage_val, 
+        post_stage_id: post_stage_val, 
+        stage_id: stage_val,
+        custom_fields: inputFields, 
+        teleprompter_id: telep_val, 
         add_users: add_members, 
         add_presenters: add_presenter
       }
@@ -273,30 +264,29 @@ import moment from 'moment'
       }
 
       axios(config)
-    .then(function (response) {
-      console.log(response)
-      if (response.data.status === 200) {
-        // listTeleprompter()
-        // setShowList('show-list')
-        // setShowItem('hide-add-item')
-        // setSingleItem([])
-        // setShow(false)
-        // toast.success(
-        // <ToastContent message='Project Successfully Added' />,
-        //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-        // )
-        } else if (response.data.status === 409) {
-          // toast.success(
-          // <ToastContent message={response.data.message} />,
-          //   { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-          // )
-        }
-          // console.log(JSON.stringify(response.data))
-    })
-    .catch(function (error) {
-      console.log(error)
-        // history.push('/login')
-    })
+      .then(function (response) {
+        console.log(response)
+        if (response.data.status === 200) {
+          listAgenda(1, 10)
+          setShow(false)
+          setCount(1)
+          toast.success(
+          <ToastContent message='Agenda Successfully Added' />,
+            { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+          )
+          } else if (response.data.status === 409) {
+            toast.success(
+            <ToastContent message={response.data.message} />,
+              { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+            )
+          }
+            // console.log(JSON.stringify(response.data))
+      })
+      .catch(function (error) {
+        console.log(error)
+          // history.push('/login')
+      })
+    }
 
     }
 
@@ -361,18 +351,19 @@ import moment from 'moment'
                     control={control}
                     defaultValue={picker} 
                     data-enable-time
-                    id='date-time-picker'
-                    // id='date-time-picker'
+                    id='date-time-picker' 
+                    // minDate='today'
                     name='start_at'
                     innerRef={register({ required: true })}
                     invalid={errors.start_at && true}
-                    className='form-control' 
+                    className={`form-control ${invalid}`} 
                     options={{
                       altFormat: "d/m/Y h:i K",
-                      altInput: true
+                      altInput: true,
+                      minDate: "today"
                     }}
-                    onChange={date => setPicker(date)}
-                   
+                    onClose={(event) => setStartTime(event)}
+                    // onClose={(event) => setRunTime(event)}
                   />
                 
                 </FormGroup>
@@ -389,7 +380,7 @@ import moment from 'moment'
                     name="run_time"
                     innerRef={register({ required: true })}
                     invalid={errors.run_time && true}
-                    className='form-control' 
+                    className={`form-control ${invalid}`}
                     options={{
                       enableTime: true,
                       noCalendar: true,
@@ -398,8 +389,9 @@ import moment from 'moment'
                       // altInput: true,
                       time_24hr: true
                     }}
-                    onChange={date => setBasic(date)}
-                   
+                    onClose={(event) => setRunTime(event)}
+                    // onChange={() => setRunTime()}
+                    // onselect={() => setRunTime()}
                   />
                  
               </FormGroup>
@@ -415,6 +407,7 @@ import moment from 'moment'
                   control={control}
                   name='pre_stage_room'
                   options={rooms} 
+                  className={invalid_pre_stage}
                   classNamePrefix='select'  
                   theme={selectThemeColors} 
                 />
@@ -430,6 +423,7 @@ import moment from 'moment'
                   control={control}
                   name='stage_room'
                   options={rooms} 
+                  className={invalid_post_stage}
                   classNamePrefix='select'  
                   theme={selectThemeColors} 
                 />
@@ -445,6 +439,7 @@ import moment from 'moment'
                   control={control}
                   name='post_stage_room'
                   options={rooms} 
+                  className={invalid_stage}
                   classNamePrefix='select'  
                   theme={selectThemeColors} 
                 />
@@ -459,7 +454,7 @@ import moment from 'moment'
                 control={control}
                 name='users'
                 options={users}
-                // className={invalid}
+                className={invalid_members}
                 classNamePrefix='select'  
                 isMulti 
                 theme={selectThemeColors}
@@ -485,7 +480,7 @@ import moment from 'moment'
                 control={control}
                 name='presenters'
                 options={presenters}
-                // className={invalid}
+                className={invalid_presenters}
                 classNamePrefix='select'  
                 isMulti 
                 theme={selectThemeColors}
@@ -516,21 +511,12 @@ import moment from 'moment'
                   control={control}
                   name='teleprompter'
                   options={teleprompter}
-                  // className={invalid}
+                  className={invalid_tele}
                   classNamePrefix='select'  
                    
                   theme={selectThemeColors}
                 />
-                {/* <Select
-                  isClearable={false}
-                  theme={selectThemeColors}
-                  // defaultValue={[users[2]]}
-                  // isMulti
-                  name='teleprompter'
-                  options={teleprompter}
-                  className='react-select'
-                  classNamePrefix='select'
-                /> */}
+                
                 </FormGroup>
             </Col>
 
@@ -586,7 +572,8 @@ import moment from 'moment'
                   color='secondary'
                   outline
                   onClick={() => {
-                    // handleReset()
+                    reset()
+                    setCount(1)
                     setShow(false)
                   }}
                 >

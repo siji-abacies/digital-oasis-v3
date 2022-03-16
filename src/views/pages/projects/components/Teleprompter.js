@@ -292,7 +292,7 @@ const AddNewModal = ({ show, setShow }) => {
       expiry_at: utc_time,
       is_open: data.is_open, 
       is_password_protected: data.is_password_protected, 
-      allowed_users: data.users, 
+      allowed_users: parseInt(data.users), 
       one_time_use: data.one_time_use, 
       password: data.password 
     }
@@ -315,6 +315,7 @@ const AddNewModal = ({ show, setShow }) => {
     .then(function (response) {
       console.log(response)
       if (response.data.status === 200) {
+        reset()
         listTeleprompter()
         setShowList('show-list')
         setShowItem('hide-add-item')
@@ -405,14 +406,16 @@ const AddNewModal = ({ show, setShow }) => {
                     // dateFormat='Y-m-d h:mm:ss'
                     // defaultValue={singleItem !== [] ? singleItem.expiry_at : new Date()}
                     // defaultValue={moment('2022-03-12 12:00:00', "YY-MM-DD HH:mm:ss").format("DD/MM/YYYY hh:mm A")}
-                    defaultValue={singleItem.expiry_at}
+                    // defaultValue={singleItem.expiry_at}
+                    // defaultValue='2022-03-12 12:00:00'
                     innerRef={register({ required: true })}
                     invalid={errors.expiry_date && true}
                     options={{
                       // altFormat: "d/m/Y h:i K",
                       // altFormat: 'd/m/Y h:m:s',
-                      // altFormat: 'Y-MM-D HH:mm:ss',
-                      altInput: true
+                      // altFormat: 'Y-M-D H:m:s',
+                      altInput: true,
+                      minDate: "today"
                       // dateFormat: "Y-m-d"
                     }} 
                   />
@@ -421,7 +424,7 @@ const AddNewModal = ({ show, setShow }) => {
             <Col md={12} xs={12}>
               <FormGroup>
                 <Label className='form-label' for='item_name'>
-                  Name
+                  No of allowed users
                 </Label>
                 <Input
                   type='text'
@@ -486,7 +489,7 @@ const AddNewModal = ({ show, setShow }) => {
                   color='secondary'
                   outline
                   onClick={() => {
-                    // handleReset()
+                    reset()
                     setShow(false)
                     setShowList('show-list')
                     setShowItem('hide-add-item')

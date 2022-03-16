@@ -39,98 +39,24 @@ import axios from 'axios'
 // ))
 
 // ** Vars
-const states = ['success', 'danger', 'warning', 'info', 'dark', 'primary', 'secondary']
 
-const data = [
-  {
-    responsive_id: '',
-    id: 1,
-    avatar: '10.jpg',
-    name: "Pre Show 1",
-    description: "Lemon drops ice cream wafer gummies dragée. Chocolate bar liquorice cheesecake cookie chupa chups marshmallow oat cake biscuit.",
-    email: 'kocrevy0@thetimes.co.uk',
-    city: 'Krasnosilka',
-    start_time: '09/23/2016 10AM',
-    salary: '$23896.35',
-    age: '61',
-    experience: '1 Year',
-    status: 2,
-    group:'Group 1',
-    length: '30 Mins', 
-    back_room: 'Green Room', 
-    stage: 'Stage 1'
-  },
-  {
-    responsive_id: '',
-    id: 1,
-    avatar: '10.jpg',
-    name: "Pre Show 1",
-    description: "Lemon drops ice cream wafer gummies dragée. Chocolate bar liquorice cheesecake cookie chupa chups marshmallow oat cake biscuit.",
-    email: 'kocrevy0@thetimes.co.uk',
-    city: 'Krasnosilka',
-    start_time: '09/23/2016 10AM',
-    salary: '$23896.35',
-    age: '61',
-    experience: '1 Year',
-    status: 2,
-    group:'Group 1',
-    length: '30 Mins', 
-    back_room: 'Green Room', 
-    stage: 'Stage 1'
-  },
-  {
-    responsive_id: '',
-    id: 1,
-    avatar: '10.jpg',
-    name: "Pre Show 1",
-    description: "Lemon drops ice cream wafer gummies dragée. Chocolate bar liquorice cheesecake cookie chupa chups marshmallow oat cake biscuit.",
-    email: 'kocrevy0@thetimes.co.uk',
-    city: 'Krasnosilka',
-    start_time: '09/23/2016 10AM',
-    salary: '$23896.35',
-    age: '61',
-    experience: '1 Year',
-    status: 2,
-    group:'Group 1',
-    length: '30 Mins', 
-    back_room: 'Green Room', 
-    stage: 'Stage 1'
-  },
-  {
-    responsive_id: '',
-    id: 1,
-    avatar: '10.jpg',
-    name: "Pre Show 1",
-    description: "Lemon drops ice cream wafer gummies dragée. Chocolate bar liquorice cheesecake cookie chupa chups marshmallow oat cake biscuit.",
-    email: 'kocrevy0@thetimes.co.uk',
-    city: 'Krasnosilka',
-    start_time: '09/23/2016 10AM',
-    salary: '$23896.35',
-    age: '61',
-    experience: '1 Year',
-    status: 2,
-    group:'Group 1',
-    length: '30 Mins', 
-    back_room: 'Green Room', 
-    stage: 'Stage 1'
-  }
-]
-
-const status = {
-  1: { title: 'Current', color: 'light-primary' },
-  2: { title: 'Professional', color: 'light-success' },
-  3: { title: 'Rejected', color: 'light-danger' },
-  4: { title: 'Resigned', color: 'light-warning' },
-  5: { title: 'Applied', color: 'light-info' }
-}
-
-const stage = [
-  { value: '1', label: 'Room 1' },
-  { value: '2', label: 'Room 2' },
-  { value: '3', label: 'Room 3' },
-  { value: '4', label: 'Room 4' },
-  { value: '5', label: 'Room 5' }
-]
+const ToastContent = ({ message = null }) => (
+  <>
+  {message !== null && (
+  <Fragment>
+      <div className='toastify-header'>
+      <div className='title-wrapper'>
+          {/* <Avatar size='sm' color='warning' icon={<Coffee size={12} />} /> */}
+          <h6 className='toast-title fw-bold'>{message}</h6>
+      </div>
+      </div>
+      <div className='toastify-body'>
+      {/* <span>You have successfully logged in as an user to Vuexy. Now you can start to explore. Enjoy!</span> */}
+      </div>
+  </Fragment>
+  )}
+  </>
+)
 
 const DataTableWithButtons = () => {
   const dispatch = useDispatch()
@@ -147,7 +73,7 @@ const DataTableWithButtons = () => {
   const [teleShow, setTeleShow] = useState(false)
   
   const [setPrevilege, setShowPrevilege] = useState(false)
-  const [rowsPerPage, setRowsPerPage] = useState(7)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
   const [total, setTotal] = useState(10)
 
   // ** Function to handle Modal toggle
@@ -160,10 +86,10 @@ const DataTableWithButtons = () => {
   const [users, setUsers] = useState([])
   const [allowContent, setAllowContent] = useState(false)
   const [dataForEdit, setDataForEdit] = useState([])
-  const listAgenda = () => {
+  const listAgenda = (page, rowsPerPage) => {
     const config = {
       method: 'get',
-      url: `https://digital-oasis-dev.herokuapp.com/v3/project/agenda/paginated_list/${id}?time_zone=Asia/Kolkata&page=1&per_page=10`,
+      url: `https://digital-oasis-dev.herokuapp.com/v3/project/agenda/paginated_list/${id}?time_zone=Asia/Kolkata&page=${page}&per_page=${rowsPerPage}`,
       headers: { 
         Authorization: `Token ${getToken()}`
       }
@@ -501,7 +427,7 @@ const DataTableWithButtons = () => {
 
   // ** Get data on mount
   useEffect(() => {
-    listAgenda()
+    listAgenda(1, 10)
     // dispatch(
     //   getData({
     //     page: currentPage,
@@ -763,7 +689,7 @@ const DataTableWithButtons = () => {
           pagination
           // selectableRows
           columns={columns}
-          paginationPerPage={7}
+          paginationPerPage={rowsPerPage}
           className='react-dataTable'
           sortIcon={<ChevronDown size={10} />}
           paginationDefaultPage={currentPage + 1}
@@ -772,8 +698,23 @@ const DataTableWithButtons = () => {
           // selectableRowsComponent={BootstrapCheckbox}
         />
       </Card>
-      <AddAgenda show={show} setShow={setShow} presenters={presenters} users={users} />
-      <EditAgenda show={editShow} setShow={setEditShow} presenters={presenters} users={users} ItemData={dataForEdit}/>
+      <AddAgenda 
+        show={show} 
+        setShow={setShow} 
+        presenters={presenters} 
+        users={users} 
+        listAgenda={listAgenda} 
+        ToastContent={ToastContent}
+      />
+      <EditAgenda 
+        show={editShow} 
+        setShow={setEditShow} 
+        presenters={presenters} 
+        users={users} 
+        ItemData={dataForEdit} 
+        listAgenda={listAgenda} 
+        ToastContent={ToastContent}
+      />
       <Teleprompter show={teleShow} setShow={setTeleShow}/>
       </>
       )}

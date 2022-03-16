@@ -211,53 +211,28 @@ import {
       axios(config)
       .then(function (response) {
       console.log(response)
-      if (response.data.status === 200) {
-        getPresenters(1, rowsPerPage)
-        // getProjectMembers()
-        setShow(false)
-        console.log(ToastContent)
-        toast.success(
-        <ToastContent message='Presenter Successfully Added' />,
-          { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
-        )
-        } else if (response.data.status === 409) {
+        if (response.data.status === 200) {
+          getPresenters(1, rowsPerPage)
+          // getProjectMembers()
+          setShow(false)
+          console.log(ToastContent)
           toast.success(
-          <ToastContent message={response.data.message} />,
+          <ToastContent message='Presenter Successfully Added' />,
             { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
           )
-        }
-          // console.log(JSON.stringify(response.data))
-      })
+          } else if (response.data.status === 409) {
+            toast.success(
+            <ToastContent message={response.data.message} />,
+              { icon: false, transition: Slide, hideProgressBar: true, autoClose: 2000 }
+            )
+          }
+            // console.log(JSON.stringify(response.data))
+        })
       .catch(function (error) {
         console.log(error)
         // history.push('/login')
       })
 
-      
-        // {"first_name": "present", 
-        // "last_name": "Two", 
-        // "company": "Abacies", 
-        // "email": "arun@abacies.com", 
-        // "iso_record": True, 
-        // "hd_local_record": True, 
-        // "send_email": True, 
-        // "custom_fields": [{"key": "Title", "value": "SE1"}], 
-        // "image_type": "image/JPG", 
-        // "file":object, 
-        // "password": "ABUE9", 
-        // "is_password_protected": True(can access the meeting  without entering the passwrord)
-        // }
-        // if (Object.values(data).every(field => field.length > 0)) {
-        //   setShow(false)
-        // } else {
-        //   for (const key in data) {
-        //     if (data[key].length === 0) {
-        //       setError(key, {
-        //         type: 'manual'
-        //       })
-        //     }
-        //   }
-        // }
     }
 
     const handleInputChange = (index, event) => {

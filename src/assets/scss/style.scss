@@ -76,3 +76,14 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
 .justify-content-center {
 	justify-content: center !important;
 }
+
+.invalid_members, 
+.invalid_presenters, 
+.invalid_tele, 
+.invalid_pre_stage, 
+.invalid_post_stage, 
+.invalid_stage {
+	.select__control {
+	  border-color: #ea5455;;
+	}
+  }

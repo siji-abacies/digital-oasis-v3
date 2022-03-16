@@ -138,6 +138,9 @@ const AddNewModal = ({ show, setShow, getProjectList, PERMISSIONS, ToastContent}
   const { register, errors, handleSubmit, control } = useForm()
       
   const onChangePrivilege = (index, e, selected_permissions) => {
+    console.log(inputData)
+    console.log(e)
+    console.log(selected_permissions)
     const permission_values = []
     let d = []
     const grup = []
