@@ -39,6 +39,7 @@ import '@uppy/status-bar/dist/style.css'
 import { useDispatch } from 'react-redux'
 import Avatar from '@components/avatar'
 import { element } from 'prop-types'
+import { inArray } from 'jquery'
 
 // const PERMISSIONS = [
 //   { value: 1, label: 'Create Project'}, 
@@ -89,6 +90,7 @@ const AddNewModal = ({ show, setShow, getProjectList, PERMISSIONS, ToastContent}
   }
   const [project_m_id, setProjectMID] = useState([])
   const [project_add_g, setProjectAddGroup] = useState([])
+  const [selected_grp, setSelectedgroup] = useState([])
   
 
   // const onChangeRole = (updateRole) => {
@@ -137,45 +139,64 @@ const AddNewModal = ({ show, setShow, getProjectList, PERMISSIONS, ToastContent}
 
   const { register, errors, handleSubmit, control } = useForm()
       
-  const onChangePrivilege = (index, e, selected_permissions) => {
+  const onChangePrivilege = (index, e, selected_permissions, item_permi_grp) => {
+    console.log(selected_permissions)
+    console.log(e)
+    console.log(inputData)
+    console.log(item_permi_grp)
+    const slt_values = []
+    e.forEach(element => {
+      slt_values.push(element.value)
+      
+    })
+    // console.log(remove_group)
     const permission_values = []
     let d = []
     const grup = []
     const project_mg_id = []
+    
+    //if inputData exist pushing project manager_id 
     inputData.forEach(element => { 
       project_mg_id.push(element.project_member_id)
     })
-    
-    console.log(project_mg_id)
-    
+
     if (inputData.length > 0) {
       console.log('greaterthan 0')
-      // project_mg_id.forEach(element => { 
-      if (project_mg_id.find(element => element === index)) {
+      if (project_mg_id.find(element => element === index)) { 
         console.log('yes')
-        inputData.forEach(element => { 
-          if (element.project_member_id === index) {
-            let group_val = null
-            e.forEach(element => { group_val = element.value })
-            element.add_groups.push(group_val)
-            
+        inputData.forEach(e_value => { 
+          // adding add_grops and remove_grp array to project manager
+          if (e_value.project_member_id === index) {
+
+            item_permi_grp.forEach(selected_val => { 
+
+              if (selected_permissions.find(sper_element => sper_element.value !== selected_val.value)) { 
+                e_value.remove_groups.push(selected_val.value)
+              } else {
+                console.log('check-no')
+                e_value.add_groups.push(selected_val.value)
+              }
+              
+            })
+          console.log(inputData)   
+
+          } else {
+            console.log('no')
+            e.forEach(element => {
+              grup.push(element.value)
+              d = {
+               project_member_id: index, 
+               remove_groups: [], 
+               add_groups: grup
+             }
+             inputData.push(d)
+            })
+        
           }
         })
-      } else {
-          console.log('no')
-          e.forEach(element => {
-            grup.push(element.value)
-            d = {
-             project_member_id: index, 
-             remove_groups: [], 
-             add_groups: grup
-           }
-           inputData.push(d)
-          })
-      
-        }
-        
-      // })
+
+      }
+
     } else {
       console.log('lessthan 0')
       e.forEach(element => {
@@ -183,57 +204,21 @@ const AddNewModal = ({ show, setShow, getProjectList, PERMISSIONS, ToastContent}
 
          d = {
           project_member_id: index, 
-          remove_groups: [], 
+          remove_groups:[], 
           add_groups: grup
         }
         project_mg_id.push(index)
         inputData.push(d)
       })
+
     }
-   
     
-    // console.log(d)
-    
-    
-    console.log(inputData)
     // [ { "project_member_id": id, "remove_groups": [group_id_1, group_id_2], "add_groups": [permission_group_id] } ]
   }
-  // const handleSubmit = (e) => {
-  //   e.preventDefault()
-  //   console.log(e.target.privileges)
-  // }
-
+ 
   const onSubmit = () => {
-    // e.preventDefault()
     console.log('onsubmit')
-    console.log(JSON.stringify(inputData))
-    // console.log(data)
-    // // [ { "project_member_id": id, "remove_groups": [group_id_1, group_id_2], "add_groups": [permission_group_id] } ]
-    // if (data.members !== undefined) {
-    //   let add_member = []
-    //   const remove_member = []
-    //   add_member = data.members.map(({value}) => {
-    //     return value
-    //   })
-    //   console.log(add_member)
-
-    //   // console.log("teee")
-    //   // console.log(data.members)
-    //   // const selectedMembers = data.members
-    //   // selectedMembers.forEach(element => {
-        
-    //   // })
-    // }
-    // console.log(data.build_date, moment(data.build_date[0]).format("Y-MM-D HH:mm:ss"))
-    // const d = {
-    //   name: data.project_name,
-    //   description: data.description,
-    //   job_number: data.project_number, 
-    //   color: data.color, 
-    //   type_: parseInt(data.type), 
-    //   build_at: moment(data.build_date[0]).format("Y-MM-D")
-    // }
-    // console.log(d)
+    console.log(inputData)
     
     const config = {
       method: 'post',
@@ -297,7 +282,7 @@ const AddNewModal = ({ show, setShow, getProjectList, PERMISSIONS, ToastContent}
                 })
               //   setPermissionGID(element.permission_group_id)
               //   console.log(element.permission_group_id)
-                
+              // setSelectedgroup(selected_p)
               })
               console.log(selected_p)
               return (
@@ -322,7 +307,7 @@ const AddNewModal = ({ show, setShow, getProjectList, PERMISSIONS, ToastContent}
                       className='react-select mb-1'
                       classNamePrefix='select' 
                       onChange={event => {
-                        onChangePrivilege(item.id, event, selected_p)
+                        onChangePrivilege(item.id, event, selected_p, item.permission_groups)
                       }}
                     />
                     </Col>
